@@ -111,62 +111,62 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | TBD | Pending |
-| CLI-02 | TBD | Pending |
-| CLI-03 | TBD | Pending |
-| CLI-04 | TBD | Pending |
-| CLI-05 | TBD | Pending |
-| CLI-06 | TBD | Pending |
-| FMT-01 | TBD | Pending |
-| FMT-02 | TBD | Pending |
-| FMT-03 | TBD | Pending |
-| FMT-04 | TBD | Pending |
-| FMT-05 | TBD | Pending |
-| FMT-06 | TBD | Pending |
-| FMT-07 | TBD | Pending |
-| PROJ-01 | TBD | Pending |
-| PROJ-02 | TBD | Pending |
-| PROJ-03 | TBD | Pending |
-| PROJ-04 | TBD | Pending |
-| PROJ-05 | TBD | Pending |
-| EXPT-01 | TBD | Pending |
-| EXPT-02 | TBD | Pending |
-| EXPT-03 | TBD | Pending |
-| EXPT-04 | TBD | Pending |
-| EXPT-05 | TBD | Pending |
-| SPRT-01 | TBD | Pending |
-| SPRT-02 | TBD | Pending |
-| SPRT-03 | TBD | Pending |
-| SPRT-04 | TBD | Pending |
-| SPRT-05 | TBD | Pending |
-| SPRT-06 | TBD | Pending |
-| SPRT-07 | TBD | Pending |
-| SPRT-08 | TBD | Pending |
-| SPRT-09 | TBD | Pending |
-| SPRT-10 | TBD | Pending |
-| SPRT-11 | TBD | Pending |
-| SPRT-12 | TBD | Pending |
-| TILE-01 | TBD | Pending |
-| TILE-02 | TBD | Pending |
-| TILE-03 | TBD | Pending |
-| TILE-04 | TBD | Pending |
-| TILE-05 | TBD | Pending |
-| TILE-06 | TBD | Pending |
-| TILE-07 | TBD | Pending |
-| TILE-08 | TBD | Pending |
-| TILE-09 | TBD | Pending |
-| SCEN-01 | TBD | Pending |
-| SCEN-02 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
+| CLI-01 | Phase 1 | Pending |
+| CLI-02 | Phase 1 | Pending |
+| CLI-03 | Phase 1 | Pending |
+| CLI-04 | Phase 1 | Pending |
+| CLI-05 | Phase 1 | Pending |
+| CLI-06 | Phase 4 | Pending |
+| FMT-01 | Phase 1 | Pending |
+| FMT-02 | Phase 1 | Pending |
+| FMT-03 | Phase 1 | Pending |
+| FMT-04 | Phase 1 | Pending |
+| FMT-05 | Phase 1 | Pending |
+| FMT-06 | Phase 1 | Pending |
+| FMT-07 | Phase 1 | Pending |
+| PROJ-01 | Phase 1 | Pending |
+| PROJ-02 | Phase 1 | Pending |
+| PROJ-03 | Phase 1 | Pending |
+| PROJ-04 | Phase 1 | Pending |
+| PROJ-05 | Phase 1 | Pending |
+| EXPT-01 | Phase 3 | Pending |
+| EXPT-02 | Phase 3 | Pending |
+| EXPT-03 | Phase 3 | Pending |
+| EXPT-04 | Phase 3 | Pending |
+| EXPT-05 | Phase 3 | Pending |
+| SPRT-01 | Phase 2 | Pending |
+| SPRT-02 | Phase 2 | Pending |
+| SPRT-03 | Phase 2 | Pending |
+| SPRT-04 | Phase 2 | Pending |
+| SPRT-05 | Phase 2 | Pending |
+| SPRT-06 | Phase 2 | Pending |
+| SPRT-07 | Phase 2 | Pending |
+| SPRT-08 | Phase 2 | Pending |
+| SPRT-09 | Phase 2 | Pending |
+| SPRT-10 | Phase 2 | Pending |
+| SPRT-11 | Phase 2 | Pending |
+| SPRT-12 | Phase 2 | Pending |
+| TILE-01 | Phase 3 | Pending |
+| TILE-02 | Phase 3 | Pending |
+| TILE-03 | Phase 3 | Pending |
+| TILE-04 | Phase 3 | Pending |
+| TILE-05 | Phase 3 | Pending |
+| TILE-06 | Phase 3 | Pending |
+| TILE-07 | Phase 3 | Pending |
+| TILE-08 | Phase 3 | Pending |
+| TILE-09 | Phase 3 | Pending |
+| SCEN-01 | Phase 4 | Pending |
+| SCEN-02 | Phase 4 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 4 | Pending |
+| TEST-03 | Phase 4 | Pending |
+| TEST-04 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 46 total
-- Mapped to phases: 0
-- Unmapped: 46
+- v1 requirements: 50 total
+- Mapped to phases: 50
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-27*
-*Last updated: 2026-03-27 after initial definition*
+*Last updated: 2026-03-27 after roadmap creation*

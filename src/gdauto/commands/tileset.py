@@ -21,6 +21,7 @@ from gdauto.tileset.terrain import (
     add_terrain_set_to_resource,
     apply_terrain_to_atlas,
 )
+from gdauto.tileset.tiled import parse_tiled_file
 
 
 @click.group(invoke_without_command=True)
@@ -558,6 +559,101 @@ def assign_physics(
             "output_path": str(output_path),
             "rules_applied": len(parsed_rules),
             "tiles_affected": total_affected,
+        },
+        _human,
+        ctx,
+    )
+
+
+# ---------------------------------------------------------------------------
+# tileset import-tiled
+# ---------------------------------------------------------------------------
+
+
+@tileset.command("import-tiled")
+@click.argument("tiled_file", type=click.Path(exists=False))
+@click.option(
+    "-o", "--output", type=click.Path(), default=None,
+    help="Output .tres path. Default: <tiled_file_stem>.tres.",
+)
+@click.option(
+    "--res-path", type=str, default=None,
+    help="Godot res:// path for the tileset image. Default: res://<image_path>.",
+)
+@click.pass_context
+def import_tiled(
+    ctx: click.Context,
+    tiled_file: str,
+    output: str | None,
+    res_path: str | None,
+) -> None:
+    """Import a Tiled .tmj/.tmx file and create a Godot TileSet .tres.
+
+    Reads the first embedded tileset from a Tiled map file, extracts tile
+    size, columns, rows, and image path, then generates a Godot TileSet
+    resource with a TileSetAtlasSource.
+    """
+    tiled_path = Path(tiled_file)
+    if not tiled_path.exists():
+        emit_error(
+            GdautoError(
+                message=f"File not found: {tiled_file}",
+                code="FILE_NOT_FOUND",
+                fix="Check the path to your Tiled .tmj or .tmx file",
+            ),
+            ctx,
+        )
+        return
+
+    try:
+        tilesets = parse_tiled_file(tiled_path)
+    except (ValidationError, Exception) as exc:
+        emit_error(
+            GdautoError(
+                message=f"Failed to parse {tiled_file}: {exc}",
+                code="TILED_PARSE_ERROR",
+                fix="Ensure the file is a valid Tiled .tmj or .tmx map",
+            ),
+            ctx,
+        )
+        return
+
+    if not tilesets:
+        emit_error(
+            GdautoError(
+                message="No embedded tilesets found in the Tiled file",
+                code="TILED_NO_TILESETS",
+                fix="Ensure the Tiled file contains at least one embedded tileset definition",
+            ),
+            ctx,
+        )
+        return
+
+    ts = tilesets[0]
+    image_res = res_path or f"res://{ts.image_path}"
+    output_path = Path(output) if output else tiled_path.with_suffix(".tres")
+    source_format = tiled_path.suffix.lstrip(".").lower()
+
+    resource = build_tileset(
+        image_res, ts.tile_width, ts.tile_height,
+        ts.columns, ts.rows, ts.margin, ts.spacing,
+    )
+    serialize_tres_file(resource, output_path)
+
+    def _human(data: dict[str, Any], verbose: bool = False) -> None:
+        click.echo(
+            f"Imported '{data['tileset_name']}' from {data['source_format']} "
+            f"({data['tile_size']}, {data['tile_count']} tiles) -> {data['output_path']}"
+        )
+
+    emit(
+        {
+            "output_path": str(output_path),
+            "tileset_name": ts.name,
+            "tile_size": f"{ts.tile_width}x{ts.tile_height}",
+            "tile_count": ts.tile_count,
+            "image": ts.image_path,
+            "source_format": source_format,
         },
         _human,
         ctx,

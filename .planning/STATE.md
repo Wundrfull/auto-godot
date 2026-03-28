@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-03-28T06:33:08.757Z"
+stopped_at: Completed 02-02 and 02-03 (wave 2)
+last_updated: "2026-03-28T06:33:43.101Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 4
@@ -58,7 +58,11 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P04 | 6min | 2 tasks | 6 files |
 | Phase 01 P05 | 7min | 3 tasks | 7 files |
 | Phase 02 P01 | 7min | 2 tasks | 11 files |
+<<<<<<< HEAD
 | Phase 02 P02 | 6min | 1 tasks | 3 files |
+=======
+| Phase 02 P03 | 7min | 2 tasks | 5 files |
+>>>>>>> worktree-agent-a39c45ea
 
 ## Accumulated Context
 
@@ -84,8 +88,13 @@ Recent decisions affecting current work:
 - [Phase 02]: AniDirection enum mirrors Aseprite string values for direct mapping
 - [Phase 02]: Hash format frames sorted by (x, y) position for consistent ordering
 - [Phase 02]: build_animation_for_tag is public for per-tag partial failure handling
+<<<<<<< HEAD
 - [Phase 02]: Made aseprite parser lenient on invalid tag directions (skip with warning) to support D-17 partial failure
 - [Phase 02]: All-tags-failed detection via warning count + empty frame_tags (distinguishes from genuinely tagless JSON)
+=======
+- [Phase 02]: Pillow import guard pattern: try/except at module level with _require_pillow() and PILLOW_NOT_INSTALLED error code
+- [Phase 02]: Shelf packing: sqrt(total_area)*1.5 width estimate, tallest-first sorting for better packing
+>>>>>>> worktree-agent-a39c45ea
 
 ### Pending Todos
 
@@ -98,6 +107,11 @@ None yet.
 
 ## Session Continuity
 
+<<<<<<< HEAD
 Last session: 2026-03-28T06:33:08.754Z
 Stopped at: Completed 02-02-PLAN.md
+=======
+Last session: 2026-03-28T06:33:43.098Z
+Stopped at: Completed 02-03-PLAN.md
+>>>>>>> worktree-agent-a39c45ea
 Resume file: None

@@ -35,6 +35,7 @@ class HeaderAttributes:
 
     tag: str  # e.g., "gd_resource", "ext_resource", "node"
     attrs: dict[str, str]  # key=value pairs from header
+    raw_line: str = ""  # Original header line for round-trip fidelity
 
 
 @dataclass
@@ -53,10 +54,10 @@ def parse_section_header(line: str) -> HeaderAttributes | None:
 
     Returns None if the line is not a valid section header.
     Handles quoted values (type="SpriteFrames"), unquoted values (format=3),
-    and bare tags ([resource]).
+    and bare tags ([resource]). Stores the raw line for round-trip fidelity.
     """
-    line = line.strip()
-    m = _HEADER_RE.match(line)
+    raw_line = line.strip()
+    m = _HEADER_RE.match(raw_line)
     if not m:
         return None
     tag = m.group(1)
@@ -64,17 +65,24 @@ def parse_section_header(line: str) -> HeaderAttributes | None:
 
     attrs: dict[str, str] = {}
 
-    # Extract all quoted attributes first
-    for qm in _ATTR_QUOTED_RE.finditer(rest):
-        attrs[qm.group(1)] = qm.group(2)
+    # Collect all attribute matches with their positions to preserve order
+    all_attrs: list[tuple[int, str, str]] = []
 
-    # Extract unquoted attributes (skip those already found as quoted)
+    for qm in _ATTR_QUOTED_RE.finditer(rest):
+        all_attrs.append((qm.start(), qm.group(1), qm.group(2)))
+
     for um in _ATTR_UNQUOTED_RE.finditer(rest):
         key = um.group(1)
-        if key not in attrs:
-            attrs[key] = um.group(2)
+        # Skip if already found as quoted (quoted match takes priority)
+        if not any(k == key for _, k, _ in all_attrs):
+            all_attrs.append((um.start(), key, um.group(2)))
 
-    return HeaderAttributes(tag=tag, attrs=attrs)
+    # Sort by position to preserve original order
+    all_attrs.sort(key=lambda x: x[0])
+    for _, key, val in all_attrs:
+        attrs[key] = val
+
+    return HeaderAttributes(tag=tag, attrs=attrs, raw_line=raw_line)
 
 
 def _count_bracket_depth(text: str) -> int:
@@ -254,9 +262,11 @@ def parse_sections(text: str) -> tuple[HeaderAttributes, list[Section]]:
 def _format_header(attrs: HeaderAttributes) -> str:
     """Format HeaderAttributes back to a [tag key=value ...] line.
 
-    Quotes string values (those that contain non-numeric characters),
-    leaves numeric values unquoted.
+    Uses the stored raw_line for round-trip fidelity when available.
+    Falls back to reconstructing from attrs when no raw line exists.
     """
+    if attrs.raw_line:
+        return attrs.raw_line
     parts = [attrs.tag]
     for key, val in attrs.attrs.items():
         # Quote values that are not purely numeric

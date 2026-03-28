@@ -67,7 +67,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: TBD
+- [x] 03-01-PLAN.md -- TileSet builder, PackedVector2Array, tileset create and inspect CLI commands
 - [ ] 03-02: TBD
 - [ ] 03-03: TBD
 
@@ -94,5 +94,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Foundation and CLI Infrastructure | 5/5 | Complete |  |
 | 2. Aseprite-to-SpriteFrames Bridge | 4/4 | Complete   | 2026-03-28 |
-| 3. TileSet Automation and Export Pipeline | 0/3 | Not started | - |
+| 3. TileSet Automation and Export Pipeline | 1/3 | In progress | - |
 | 4. Scene Commands, Test Suite, and Agent Discoverability | 0/2 | Not started | - |

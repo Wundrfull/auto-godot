@@ -60,10 +60,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### TileSet
 
 - [x] **TILE-01**: `gdauto tileset create` accepts a sprite sheet image + tile size and generates a .tres TileSet with TileSetAtlasSource (supports margin and separation parameters)
-- [ ] **TILE-02**: `gdauto tileset auto-terrain` auto-assigns terrain peering bits for the 47-tile blob layout (Match Corners and Sides, 8 bits)
-- [ ] **TILE-03**: `gdauto tileset auto-terrain` auto-assigns terrain peering bits for the 16-tile minimal layout (Match Sides, 4 bits)
-- [ ] **TILE-04**: `gdauto tileset auto-terrain` auto-assigns terrain peering bits for the RPG Maker layout
-- [ ] **TILE-05**: `gdauto tileset assign-physics` batch assigns collision shapes (full, half-top, half-bottom, none) to tile ranges by pattern
+- [x] **TILE-02**: `gdauto tileset auto-terrain` auto-assigns terrain peering bits for the 47-tile blob layout (Match Corners and Sides, 8 bits)
+- [x] **TILE-03**: `gdauto tileset auto-terrain` auto-assigns terrain peering bits for the 16-tile minimal layout (Match Sides, 4 bits)
+- [x] **TILE-04**: `gdauto tileset auto-terrain` auto-assigns terrain peering bits for the RPG Maker layout
+- [x] **TILE-05**: `gdauto tileset assign-physics` batch assigns collision shapes (full, half-top, half-bottom, none) to tile ranges by pattern
 - [x] **TILE-06**: `gdauto tileset inspect` dumps an existing TileSet resource as structured JSON: atlas sources, terrain sets, peering bit configurations, physics layers
 - [ ] **TILE-07**: TileSet validation: verifies generated TileSets load in headless Godot, terrain painting produces correct tile selection
 - [x] **TILE-08**: Researched common tileset import failures and built preventions into the tool (wrong tile size, misaligned grid, incorrect peering bits)
@@ -147,10 +147,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SPRT-11 | Phase 2 | Complete |
 | SPRT-12 | Phase 2 | Complete |
 | TILE-01 | Phase 3 | Complete (03-01) |
-| TILE-02 | Phase 3 | Pending |
-| TILE-03 | Phase 3 | Pending |
-| TILE-04 | Phase 3 | Pending |
-| TILE-05 | Phase 3 | Pending |
+| TILE-02 | Phase 3 | Complete |
+| TILE-03 | Phase 3 | Complete |
+| TILE-04 | Phase 3 | Complete |
+| TILE-05 | Phase 3 | Complete |
 | TILE-06 | Phase 3 | Complete (03-01) |
 | TILE-07 | Phase 3 | Pending |
 | TILE-08 | Phase 3 | Complete (03-01) |

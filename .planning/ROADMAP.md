@@ -68,7 +68,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md -- TileSet builder, PackedVector2Array, tileset create and inspect CLI commands
-- [ ] 03-02-PLAN.md -- Terrain peering bit lookup tables, auto-terrain and assign-physics commands
+- [x] 03-02-PLAN.md -- Terrain peering bit lookup tables, auto-terrain and assign-physics commands
 - [x] 03-03-PLAN.md -- Export/import pipeline with retry logic, release/debug/pack CLI, root import command
 - [ ] 03-04-PLAN.md -- Tiled .tmx/.tmj import and TileSet validation
 

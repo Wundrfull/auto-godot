@@ -35,7 +35,7 @@ Plans:
 - [x] 01-01-PLAN.md -- Python package scaffolding, CLI skeleton with global flags, error handling, output abstraction
 - [x] 01-02-PLAN.md -- Godot value type dataclasses with parsing, serialization, and arithmetic
 - [ ] 01-03-PLAN.md -- Custom .tscn/.tres parser with round-trip fidelity, UID and resource ID generation
-- [ ] 01-04-PLAN.md -- project.godot parser and Godot backend wrapper
+- [x] 01-04-PLAN.md -- project.godot parser and Godot backend wrapper
 - [ ] 01-05-PLAN.md -- Project commands (info, validate, create), resource inspect, integration tests
 
 ### Phase 2: Aseprite-to-SpriteFrames Bridge

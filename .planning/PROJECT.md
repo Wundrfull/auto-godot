@@ -29,14 +29,19 @@ Validated in Phase 2: Aseprite-to-SpriteFrames Bridge
 - [x] sprite create-atlas: batch multiple sprite images into atlas textures
 - [x] sprite validate: verify generated SpriteFrames .tres files are valid and loadable
 
+Validated in Phase 3: TileSet Automation and Export Pipeline
+- [x] tileset create: sprite sheet + tile size to TileSetAtlasSource .tres
+- [x] tileset auto-terrain: auto-assign terrain peering bits for blob-47, minimal-16, RPG Maker layouts
+- [x] tileset assign-physics: batch assign collision shapes (full/none) to tile ranges
+- [x] tileset inspect: dump existing TileSet resource as structured JSON
+- [x] tileset import-tiled: convert Tiled .tmx/.tmj files to Godot TileSet .tres
+- [x] tileset validate: structural validation with optional headless Godot check
+- [x] export release/debug/pack with named presets, structured error reporting, exit codes
+- [x] import: force re-import with exponential backoff retry logic (1s/2s/4s)
+- [x] Auto-import before export when import cache is missing
+
 ### Active
 
-- [ ] export release/debug/pack with named presets, structured error reporting, exit codes
-- [ ] import: force re-import with retry logic for known timing bugs
-- [ ] tileset create: sprite sheet + tile size to TileSetAtlasSource
-- [ ] tileset auto-terrain: auto-assign terrain peering bits for standard layouts (47-tile blob, 16-tile minimal, RPG Maker)
-- [ ] tileset assign-physics: batch assign collision shapes to tile ranges by pattern
-- [ ] tileset inspect: dump existing TileSet resource as structured JSON
 - [ ] scene list: enumerate scenes, node trees, dependencies
 - [ ] scene create: create scenes from JSON/YAML definitions
 - [ ] All generated .tres/.tscn files loadable by Godot without modification
@@ -49,7 +54,7 @@ Validated in Phase 2: Aseprite-to-SpriteFrames Bridge
 - Particle effect and shader preset generation -- requires GPU for validation, defer
 - Multiplayer server management and load testing -- separate concern, defer
 - Addon/plugin management wrapping the Asset Library API -- fragmented ecosystem, defer
-- Tiled .tmx/.tmj import support -- stretch goal, defer to later milestone
+- Tiled .tmx/.tmj full map-to-TileMap conversion -- basic tileset extraction implemented, full map conversion deferred
 - OAuth or GUI-based workflows -- CLI-only tool
 - Godot 3.x support -- targets Godot 4.5+ only
 
@@ -107,4 +112,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-28 after Phase 2 completion*
+*Last updated: 2026-03-28 after Phase 3 completion*

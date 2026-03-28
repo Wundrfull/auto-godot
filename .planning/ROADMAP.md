@@ -13,7 +13,7 @@ gdauto delivers an agent-native CLI for Godot engine automation in four phases. 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation and CLI Infrastructure** - File format parser, CLI skeleton with --json, Godot backend wrapper, project commands, resource inspection
-- [ ] **Phase 2: Aseprite-to-SpriteFrames Bridge** - Core value: convert Aseprite JSON exports to valid Godot SpriteFrames .tres resources
+- [x] **Phase 2: Aseprite-to-SpriteFrames Bridge** - Core value: convert Aseprite JSON exports to valid Godot SpriteFrames .tres resources (completed 2026-03-28)
 - [ ] **Phase 3: TileSet Automation and Export Pipeline** - TileSet creation, terrain peering bits, physics assignment, headless export/import commands
 - [ ] **Phase 4: Scene Commands, Test Suite, and Agent Discoverability** - Scene list/create, comprehensive E2E tests, golden file validation, SKILL.md generation
 
@@ -47,13 +47,13 @@ Plans:
   2. Variable-duration animations convert correctly: per-frame timing is preserved via GCD-based base FPS with duration multipliers, and all four Aseprite directions (forward, reverse, ping-pong, ping-pong reverse) work
   3. User can run `gdauto sprite split` on a sprite sheet (with or without JSON metadata) and get a valid SpriteFrames resource, and `gdauto sprite create-atlas` batches multiple images into an atlas
   4. Generated SpriteFrames pass validation in headless Godot: animation names exist, frame counts match source, no broken texture references
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 02-01-PLAN.md -- Aseprite JSON parser, SpriteFrames GdResource builder, and core data pipeline
 - [x] 02-02-PLAN.md -- import-aseprite CLI command with .tres writing and import guide help text
 - [x] 02-03-PLAN.md -- sprite split (grid-based sheet splitting) and create-atlas (shelf-packing compositor)
-- [ ] 02-04-PLAN.md -- sprite validate command (structural and headless Godot validation)
+- [x] 02-04-PLAN.md -- sprite validate command (structural and headless Godot validation)
 
 ### Phase 3: TileSet Automation and Export Pipeline
 **Goal**: Users can automate TileSet creation and terrain configuration from the command line, and export Godot projects headlessly for CI/CD pipelines
@@ -93,6 +93,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and CLI Infrastructure | 5/5 | Complete |  |
-| 2. Aseprite-to-SpriteFrames Bridge | 0/4 | Not started | - |
+| 2. Aseprite-to-SpriteFrames Bridge | 4/4 | Complete   | 2026-03-28 |
 | 3. TileSet Automation and Export Pipeline | 0/3 | Not started | - |
 | 4. Scene Commands, Test Suite, and Agent Discoverability | 0/2 | Not started | - |

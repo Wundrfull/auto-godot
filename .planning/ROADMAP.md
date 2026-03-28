@@ -36,7 +36,7 @@ Plans:
 - [x] 01-02-PLAN.md -- Godot value type dataclasses with parsing, serialization, and arithmetic
 - [x] 01-03-PLAN.md -- Custom .tscn/.tres parser with round-trip fidelity, UID and resource ID generation
 - [x] 01-04-PLAN.md -- project.godot parser and Godot backend wrapper
-- [ ] 01-05-PLAN.md -- Project commands (info, validate, create), resource inspect, integration tests
+- [x] 01-05-PLAN.md -- Project commands (info, validate, create), resource inspect, integration tests
 
 ### Phase 2: Aseprite-to-SpriteFrames Bridge
 **Goal**: Users can convert Aseprite sprite sheet exports into valid Godot SpriteFrames resources from the command line, with full animation support, entirely without the Godot editor

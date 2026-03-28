@@ -24,14 +24,14 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FMT-04**: Resource ID generation matching Godot 4.x format (string-based alphanumeric IDs like `Type_xxxxx`)
 - [x] **FMT-05**: UID generation and .uid companion file support for Godot 4.4+
 - [x] **FMT-06**: Round-trip fidelity: parse a .tres/.tscn and re-serialize it without introducing spurious diffs
-- [ ] **FMT-07**: `gdauto resource inspect` dumps any .tres or .tscn file as structured JSON
+- [x] **FMT-07**: `gdauto resource inspect` dumps any .tres or .tscn file as structured JSON
 
 ### Project Management
 
-- [ ] **PROJ-01**: `gdauto project info` reads project.godot and outputs project name, Godot version, autoloads, input mappings, display settings as JSON
-- [ ] **PROJ-02**: `gdauto project validate` checks project structure: verifies all `res://` paths resolve, detects missing resources, reports orphan scripts
-- [ ] **PROJ-03**: `gdauto project validate` optionally runs Godot `--check-only` for script syntax validation when Godot binary is available
-- [ ] **PROJ-04**: `gdauto project create` scaffolds new projects from built-in templates with project.godot, default scene, folder structure
+- [x] **PROJ-01**: `gdauto project info` reads project.godot and outputs project name, Godot version, autoloads, input mappings, display settings as JSON
+- [x] **PROJ-02**: `gdauto project validate` checks project structure: verifies all `res://` paths resolve, detects missing resources, reports orphan scripts
+- [x] **PROJ-03**: `gdauto project validate` optionally runs Godot `--check-only` for script syntax validation when Godot binary is available
+- [x] **PROJ-04**: `gdauto project create` scaffolds new projects from built-in templates with project.godot, default scene, folder structure
 - [x] **PROJ-05**: Godot backend wrapper: discovers binary on PATH or via `--godot-path`, validates version >= 4.5, manages timeouts, parses stderr for structured error reporting
 
 ### Export Pipeline
@@ -123,11 +123,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FMT-04 | Phase 1 | Complete |
 | FMT-05 | Phase 1 | Complete |
 | FMT-06 | Phase 1 | Complete |
-| FMT-07 | Phase 1 | Pending |
-| PROJ-01 | Phase 1 | Pending |
-| PROJ-02 | Phase 1 | Pending |
-| PROJ-03 | Phase 1 | Pending |
-| PROJ-04 | Phase 1 | Pending |
+| FMT-07 | Phase 1 | Complete |
+| PROJ-01 | Phase 1 | Complete |
+| PROJ-02 | Phase 1 | Complete |
+| PROJ-03 | Phase 1 | Complete |
+| PROJ-04 | Phase 1 | Complete |
 | PROJ-05 | Phase 1 | Complete |
 | EXPT-01 | Phase 3 | Pending |
 | EXPT-02 | Phase 3 | Pending |

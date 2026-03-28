@@ -1,0 +1,40 @@
+{
+  "root": {
+    "name": "Level",
+    "type": "Node2D",
+    "children": [
+      {
+        "name": "Player",
+        "type": "CharacterBody2D",
+        "properties": {
+          "position": "Vector2(100, 200)"
+        },
+        "children": [
+          {
+            "name": "Sprite",
+            "type": "Sprite2D",
+            "properties": {
+              "position": "Vector2(0, 0)"
+            }
+          },
+          {
+            "name": "CollisionShape",
+            "type": "CollisionShape2D"
+          }
+        ]
+      },
+      {
+        "name": "TileMap",
+        "type": "TileMapLayer"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Script",
+      "path": "res://scripts/player.gd",
+      "assign_to": "Player",
+      "property": "script"
+    }
+  ]
+}

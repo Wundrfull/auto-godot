@@ -51,8 +51,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SPRT-05**: Handles loop settings from Aseprite repeat counts (0 = loop forever, N = play N times)
 - [x] **SPRT-06**: Handles trimmed sprites with spriteSourceSize offsets
 - [ ] **SPRT-07**: Writes valid .tres SpriteFrames resource with named animations, AtlasTexture sub-resources, correct speed and loop settings
-- [ ] **SPRT-08**: `gdauto sprite split` takes a sprite sheet image + optional JSON metadata and generates SpriteFrames (grid-based or JSON-defined regions)
-- [ ] **SPRT-09**: `gdauto sprite create-atlas` batches multiple sprite images into a single atlas texture with companion metadata (bin-packing, power-of-two sizes)
+- [x] **SPRT-08**: `gdauto sprite split` takes a sprite sheet image + optional JSON metadata and generates SpriteFrames (grid-based or JSON-defined regions)
+- [x] **SPRT-09**: `gdauto sprite create-atlas` batches multiple sprite images into a single atlas texture with companion metadata (bin-packing, power-of-two sizes)
 - [ ] **SPRT-10**: Sprite validation pipeline: verifies generated SpriteFrames load in headless Godot, checks animation names exist, frame counts match, no broken texture references
 - [ ] **SPRT-11**: Import guide documentation for users and AI agents: correct Aseprite export settings (grid size, pixel size, frame ordering, JSON format), common pitfalls, and recommended workflows
 - [x] **SPRT-12**: Researched common Aseprite-to-Godot import failures and built preventions into the tool (wrong frame order, mismatched dimensions, missing tags, incorrect trim data)
@@ -141,8 +141,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SPRT-05 | Phase 2 | Complete |
 | SPRT-06 | Phase 2 | Complete |
 | SPRT-07 | Phase 2 | Pending |
-| SPRT-08 | Phase 2 | Pending |
-| SPRT-09 | Phase 2 | Pending |
+| SPRT-08 | Phase 2 | Complete |
+| SPRT-09 | Phase 2 | Complete |
 | SPRT-10 | Phase 2 | Pending |
 | SPRT-11 | Phase 2 | Pending |
 | SPRT-12 | Phase 2 | Complete |

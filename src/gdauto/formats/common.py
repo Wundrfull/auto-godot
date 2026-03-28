@@ -25,6 +25,8 @@ _HEADER_RE = re.compile(r"^\[(\w+)(.*)?\]\s*$")
 # coordinate properties (e.g., "0:0/terrain_set", "sources/0")
 _PROPERTY_RE = re.compile(r"^([\w:/]+)\s*=\s*(.*)$")
 
+# Pattern for constructor attribute values: key=Type("value")
+_ATTR_CONSTRUCTOR_RE = re.compile(r'(\w+)\s*=\s*([A-Za-z_]\w*\("[^"]*"\))')
 # Pattern for quoted attribute values in headers: key="value"
 _ATTR_QUOTED_RE = re.compile(r'(\w+)\s*=\s*"([^"]*)"')
 # Pattern for unquoted attribute values in headers: key=value
@@ -67,15 +69,22 @@ def parse_section_header(line: str) -> HeaderAttributes | None:
 
     attrs: dict[str, str] = {}
 
-    # Collect all attribute matches with their positions to preserve order
+    # Collect all attribute matches with their positions to preserve order.
+    # Constructor values (e.g. instance=ExtResource("id")) are checked first
+    # since they contain quotes that would confuse the quoted/unquoted patterns.
     all_attrs: list[tuple[int, str, str]] = []
 
+    for cm in _ATTR_CONSTRUCTOR_RE.finditer(rest):
+        all_attrs.append((cm.start(), cm.group(1), cm.group(2)))
+
     for qm in _ATTR_QUOTED_RE.finditer(rest):
-        all_attrs.append((qm.start(), qm.group(1), qm.group(2)))
+        key = qm.group(1)
+        if not any(k == key for _, k, _ in all_attrs):
+            all_attrs.append((qm.start(), key, qm.group(2)))
 
     for um in _ATTR_UNQUOTED_RE.finditer(rest):
         key = um.group(1)
-        # Skip if already found as quoted (quoted match takes priority)
+        # Skip if already found as constructor or quoted
         if not any(k == key for _, k, _ in all_attrs):
             all_attrs.append((um.start(), key, um.group(2)))
 

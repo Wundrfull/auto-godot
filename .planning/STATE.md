@@ -58,11 +58,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P04 | 6min | 2 tasks | 6 files |
 | Phase 01 P05 | 7min | 3 tasks | 7 files |
 | Phase 02 P01 | 7min | 2 tasks | 11 files |
-<<<<<<< HEAD
 | Phase 02 P02 | 6min | 1 tasks | 3 files |
-=======
 | Phase 02 P03 | 7min | 2 tasks | 5 files |
->>>>>>> worktree-agent-a39c45ea
 | Phase 02 P04 | 10min | 1 tasks | 4 files |
 
 ## Accumulated Context
@@ -90,17 +87,10 @@ Recent decisions affecting current work:
 - [Phase 02]: Hash format frames sorted by (x, y) position for consistent ordering
 - [Phase 02]: build_animation_for_tag is public for per-tag partial failure handling
 
-<<<<<<< HEAD
-
 - [Phase 02]: Made aseprite parser lenient on invalid tag directions (skip with warning) to support D-17 partial failure
 - [Phase 02]: All-tags-failed detection via warning count + empty frame_tags (distinguishes from genuinely tagless JSON)
-
-=======
-
 - [Phase 02]: Pillow import guard pattern: try/except at module level with _require_pillow() and PILLOW_NOT_INSTALLED error code
 - [Phase 02]: Shelf packing: sqrt(total_area)*1.5 width estimate, tallest-first sorting for better packing
-
->>>>>>> worktree-agent-a39c45ea
 
 - [Phase 02]: Separated fatal validation issues from non-fatal warnings; load_steps mismatch is warning-only
 - [Phase 02]: Fixed _split_args to track all nesting delimiters (parens, braces, brackets) for correct dict-in-array parsing
@@ -116,11 +106,6 @@ None yet.
 
 ## Session Continuity
 
-<<<<<<< HEAD
 Last session: 2026-03-28T06:50:35.327Z
-Stopped at: Completed 02-04-PLAN.md
-=======
-Last session: 2026-03-28T06:33:43.098Z
-Stopped at: Completed 02-03-PLAN.md
->>>>>>> worktree-agent-a39c45ea
+Stopped at: Completed all phase 02 plans
 Resume file: None

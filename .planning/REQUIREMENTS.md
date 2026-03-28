@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **FMT-01**: Custom state-machine parser for Godot 4.x .tscn files (format=3), handling bracket sections, nested structures, multi-line values
 - [ ] **FMT-02**: Custom state-machine parser for Godot 4.x .tres files (format=3), handling sub_resources, ext_resources, and the resource section
-- [ ] **FMT-03**: Godot value type serializer/deserializer covering Vector2, Vector2i, Vector3, Rect2, Color, Transform2D, StringName, arrays, dictionaries
+- [x] **FMT-03**: Godot value type serializer/deserializer covering Vector2, Vector2i, Vector3, Rect2, Color, Transform2D, StringName, arrays, dictionaries
 - [ ] **FMT-04**: Resource ID generation matching Godot 4.x format (string-based alphanumeric IDs like `Type_xxxxx`)
 - [ ] **FMT-05**: UID generation and .uid companion file support for Godot 4.4+
 - [ ] **FMT-06**: Round-trip fidelity: parse a .tres/.tscn and re-serialize it without introducing spurious diffs
@@ -76,7 +76,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Testing
 
-- [ ] **TEST-01**: Unit tests for all pure Python logic (parser, value types, Aseprite conversion, peering bit calculation) run without Godot binary
+- [x] **TEST-01**: Unit tests for all pure Python logic (parser, value types, Aseprite conversion, peering bit calculation) run without Godot binary
 - [ ] **TEST-02**: E2E tests marked with `@pytest.mark.requires_godot` that load generated .tres/.tscn in headless Godot
 - [ ] **TEST-03**: Validation tests that verify peering bit assignments match expected patterns for all supported layouts
 - [ ] **TEST-04**: Generated .tres/.tscn files validated against known-good reference outputs
@@ -119,7 +119,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-06 | Phase 4 | Pending |
 | FMT-01 | Phase 1 | Pending |
 | FMT-02 | Phase 1 | Pending |
-| FMT-03 | Phase 1 | Pending |
+| FMT-03 | Phase 1 | Complete |
 | FMT-04 | Phase 1 | Pending |
 | FMT-05 | Phase 1 | Pending |
 | FMT-06 | Phase 1 | Pending |
@@ -157,7 +157,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TILE-09 | Phase 3 | Pending |
 | SCEN-01 | Phase 4 | Pending |
 | SCEN-02 | Phase 4 | Pending |
-| TEST-01 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 4 | Pending |
 | TEST-03 | Phase 4 | Pending |
 | TEST-04 | Phase 4 | Pending |

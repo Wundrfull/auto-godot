@@ -8,6 +8,16 @@ gdauto is a feature-complete, agent-native command-line tool for the Godot game 
 
 **v1.0 shipped 2026-03-29.** All 50 requirements validated across 4 phases, 16 plans.
 
+## Current Milestone: v1.1 Feature Expansion
+
+**Goal:** Expand godauto with full Tiled-to-TileMap conversion, scene editing commands, PyPI distribution, and addon/plugin management.
+
+**Target features:**
+- Full Tiled .tmx/.tmj map-to-TileMap conversion (layers, tile placement, playable .tscn output)
+- Scene editing: add/remove nodes, set properties, attach scripts, wire signals in existing .tscn files
+- PyPI publishing: package distribution polish, proper versioning, `pip install godauto`
+- Addon/plugin management: Asset Library API integration for CLI-based plugin install/management
+
 ## Core Value
 
 The Aseprite-to-SpriteFrames bridge: read Aseprite's JSON export and generate valid Godot .tres SpriteFrames resources with named animations, correct frame durations, atlas texture regions, and loop settings, entirely in Python with no Godot binary required.
@@ -54,7 +64,11 @@ Validated in Phase 4: Scene Commands, Test Suite, and Agent Discoverability
 
 ### Active
 
-All v1 requirements validated. No active requirements remain.
+- [ ] Full Tiled map-to-TileMap .tscn conversion
+- [ ] Scene node editing (add, remove, set properties)
+- [ ] Script attachment and signal wiring in existing scenes
+- [ ] PyPI distribution (`pip install godauto`)
+- [ ] Addon/plugin management via Asset Library API
 
 ### Out of Scope
 
@@ -62,8 +76,8 @@ All v1 requirements validated. No active requirements remain.
 - RL/ML training pipeline integration (Godot RL Agents) -- separate domain, defer
 - Particle effect and shader preset generation -- requires GPU for validation, defer
 - Multiplayer server management and load testing -- separate concern, defer
-- Addon/plugin management wrapping the Asset Library API -- fragmented ecosystem, defer
-- Tiled .tmx/.tmj full map-to-TileMap conversion -- basic tileset extraction implemented, full map conversion deferred
+- Addon/plugin management via Asset Library API -- moved to Active for v1.1
+- Tiled .tmx/.tmj full map-to-TileMap conversion -- moved to Active for v1.1
 - OAuth or GUI-based workflows -- CLI-only tool
 - Godot 3.x support -- targets Godot 4.5+ only
 
@@ -124,4 +138,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after v1.0 milestone completion*
+*Last updated: 2026-03-29 after v1.1 milestone start*

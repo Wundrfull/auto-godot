@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: gdauto v1.0
-status: complete
-stopped_at: Milestone v1.0 shipped
-last_updated: "2026-03-29T01:00:00.000Z"
+milestone: v1.1
+milestone_name: v1.1 Feature Expansion
+status: defining_requirements
+stopped_at: Milestone v1.1 started
+last_updated: "2026-03-29T02:00:00.000Z"
 last_activity: 2026-03-29
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,15 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Aseprite-to-SpriteFrames bridge: read Aseprite's JSON export and generate valid Godot .tres SpriteFrames resources with named animations, correct frame durations, atlas texture regions, and loop settings, entirely in Python with no Godot binary required.
-**Current focus:** v1.0 complete; planning next milestone
+**Current focus:** v1.1 Feature Expansion -- defining requirements
 
 ## Current Position
 
-Milestone: v1.0 -- SHIPPED 2026-03-29
-Phase: 4 of 4 -- all complete
-Status: Milestone complete
+Phase: Not started (defining requirements)
+Plan: --
+Status: Defining requirements
+Last activity: 2026-03-29 -- Milestone v1.1 started
 
-Progress: [##########] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 

@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=6 format=3 uid="uid://NORMALIZED"]
+[gd_resource type="SpriteFrames" format=3 uid="uid://NORMALIZED"]
 
 [ext_resource type="Texture2D" uid="uid://NORMALIZED" path="res://test_sheet.png" id="Texture2D_XXXXX"]
 

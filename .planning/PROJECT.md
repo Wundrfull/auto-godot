@@ -9,9 +9,17 @@ gdauto is a feature-complete, agent-native command-line tool for the Godot game 
 **v1.0 shipped 2026-03-29.** All 50 requirements validated across 4 phases, 16 plans.
 **v1.1 shipped 2026-03-29.** Godot 4.6 compatibility audit complete: 11 requirements validated across 2 phases, 4 plans.
 
-## Next Milestone
+## Current Milestone: v2.0 Live Game Interaction
 
-Not yet planned. Run `/gsd:new-milestone` to define the next milestone.
+**Goal:** Enable Claude Code to connect to a running Godot instance via the remote debugger protocol, read game state, inject player input, and verify behavior, closing the write-code-to-test-it loop without a human in the middle.
+
+**Target features:**
+- Connect to running Godot instance via TCP debugger protocol
+- Read scene tree structure and node properties at runtime
+- Modify node properties at runtime
+- Inject input events (mouse clicks, key presses) programmatically
+- Assertion/verification layer for automated game testing
+- End-to-end workflow: launch game, interact, verify (simple cases like idle clicker)
 
 ## Core Value
 
@@ -69,7 +77,7 @@ Validated in Phase 6: E2E Validation and Ecosystem Audit
 
 ### Active
 
-None -- planning next milestone.
+(Defining requirements for v2.0)
 
 ### Out of Scope
 
@@ -139,4 +147,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after v1.1 milestone archived*
+*Last updated: 2026-03-29 after v2.0 milestone started*

@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: idle
-stopped_at: Completed v1.1 milestone
-last_updated: "2026-03-29T07:10:00.000Z"
+milestone: v2.0
+milestone_name: Live Game Interaction
+status: defining-requirements
+stopped_at: Defining requirements for v2.0
+last_updated: "2026-03-29T08:00:00.000Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Aseprite-to-SpriteFrames bridge: read Aseprite's JSON export and generate valid Godot .tres SpriteFrames resources with named animations, correct frame durations, atlas texture regions, and loop settings, entirely in Python with no Godot binary required.
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v2.0 Live Game Interaction
 
 ## Current Position
 
-Phase: None (between milestones)
-Plan: None
-Status: Idle
-Last activity: 2026-03-29
+Phase: Not started (defining requirements)
+Plan: --
+Status: Defining requirements
+Last activity: 2026-03-29 -- Milestone v2.0 started
 
 ## Shipped Milestones
 
@@ -38,5 +38,5 @@ Last activity: 2026-03-29
 ## Session Continuity
 
 Last session: 2026-03-29
-Stopped at: Completed v1.1 milestone
+Stopped at: Defining requirements for v2.0
 Resume file: None

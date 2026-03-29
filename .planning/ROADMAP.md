@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Foundation and CLI Infrastructure** - File format parser, CLI skeleton with --json, Godot backend wrapper, project commands, resource inspection
 - [x] **Phase 2: Aseprite-to-SpriteFrames Bridge** - Core value: convert Aseprite JSON exports to valid Godot SpriteFrames .tres resources (completed 2026-03-28)
 - [ ] **Phase 3: TileSet Automation and Export Pipeline** - TileSet creation, terrain peering bits, physics assignment, headless export/import commands
-- [ ] **Phase 4: Scene Commands, Test Suite, and Agent Discoverability** - Scene list/create, comprehensive E2E tests, golden file validation, SKILL.md generation
+- [x] **Phase 4: Scene Commands, Test Suite, and Agent Discoverability** - Scene list/create, comprehensive E2E tests, golden file validation, SKILL.md generation (completed 2026-03-29)
 
 ## Phase Details
 
@@ -80,12 +80,12 @@ Plans:
   1. User can run `gdauto scene list` to enumerate all scenes in a project with node trees and dependencies, and `gdauto scene create` to generate .tscn files from JSON definitions
   2. A SKILL.md file is auto-generated from the CLI command tree, containing all command names, arguments, options, and help text in a format AI agents can use for tool discovery
   3. E2E test suite loads all generated resource types (.tres SpriteFrames, .tres TileSets, .tscn scenes) in headless Godot and validates correctness; golden file tests verify output stability against known-good reference files
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md -- Scene builder, lister, and scene list/create CLI commands with unit tests
-- [ ] 04-02-PLAN.md -- SKILL.md auto-generation from Click CLI introspection
-- [ ] 04-03-PLAN.md -- E2E test suite with headless Godot validation and golden file comparison
+- [x] 04-02-PLAN.md -- SKILL.md auto-generation from Click CLI introspection
+- [x] 04-03-PLAN.md -- E2E test suite with headless Godot validation and golden file comparison
 
 ## Progress
 
@@ -97,4 +97,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation and CLI Infrastructure | 5/5 | Complete |  |
 | 2. Aseprite-to-SpriteFrames Bridge | 4/4 | Complete   | 2026-03-28 |
 | 3. TileSet Automation and Export Pipeline | 2/4 | In progress | - |
-| 4. Scene Commands, Test Suite, and Agent Discoverability | 0/3 | Not started | - |
+| 4. Scene Commands, Test Suite, and Agent Discoverability | 3/3 | Complete   | 2026-03-29 |

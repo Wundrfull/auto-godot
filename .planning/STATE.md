@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed wave 1 (04-01, 04-02)
-last_updated: "2026-03-28T23:56:58.330Z"
-last_activity: 2026-03-28
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-03-29T00:08:17.892Z"
+last_activity: 2026-03-29
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 15
-  percent: 67
+  completed_plans: 16
+  percent: 60
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 4 of 4 (scene commands, test suite, and agent discoverability)
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-03-28
+Last activity: 2026-03-29
 
 Progress: [######░░░░] 60%
 
@@ -66,6 +66,7 @@ Progress: [######░░░░] 60%
 | Phase 03 P04 | 6min | 2 tasks | 8 files |
 | Phase 04 P01 | 8min | 3 tasks | 9 files |
 | Phase 04 P02 | 6min | 2 tasks | 5 files |
+| Phase 04 P03 | 6min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,7 @@ Recent decisions affecting current work:
 - [Phase 04]: Constructor-form header attributes parsed via dedicated regex in common.py before quoted/unquoted patterns
 - [Phase 04]: Structured markdown output (not YAML) for native LLM consumption in SKILL.md
 - [Phase 04]: Known example overrides dict for realistic per-command usage examples
+- [Phase 04]: Extended UID normalization to cover ExtResource() and SubResource() value references for golden file stability
 
 ### Pending Todos
 
@@ -124,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:56:58.328Z
-Stopped at: Completed wave 1 (04-01, 04-02)
+Last session: 2026-03-29T00:08:17.889Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None

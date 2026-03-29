@@ -2,7 +2,11 @@
 
 ## What This Is
 
-gdauto is an agent-native command-line tool for the Godot game engine. Built in Python on Click, it wraps Godot's headless mode and directly manipulates Godot's text-based file formats (.tscn, .tres, project.godot) to automate workflows that currently require the Godot editor GUI. It operates in two modes: direct file manipulation (no Godot binary needed) and headless Godot invocation (for operations requiring the engine runtime).
+gdauto is a feature-complete, agent-native command-line tool for the Godot game engine. Built in Python on Click, it wraps Godot's headless mode and directly manipulates Godot's text-based file formats (.tscn, .tres, project.godot) to automate workflows that currently require the Godot editor GUI. It ships 28 commands across 8 command groups (project, export, sprite, tileset, scene, resource, skill, import), with 7,200+ lines of source code and 648 tests.
+
+## Current State
+
+**v1.0 shipped 2026-03-29.** All 50 requirements validated across 4 phases, 16 plans.
 
 ## Core Value
 
@@ -93,11 +97,14 @@ All v1 requirements validated. No active requirements remain.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Python + Click over Rust/Go | Rapid iteration, rich ecosystem for text parsing, target audience familiar with pip | -- Pending |
-| Direct .tres/.tscn generation over GDScript codegen | Simpler, no Godot dependency, text format is stable and documented | -- Pending |
-| State machine parser over regex for Godot file format | Nested structures and multi-line values make regex fragile | -- Pending |
-| PEP 420 namespace package structure | Coexistence with other CLI tools, clean module boundaries | -- Pending |
-| Apache-2.0 license | Permissive, compatible with Godot's MIT license, suitable for community tool | -- Pending |
+| Python + Click over Rust/Go | Rapid iteration, rich ecosystem for text parsing, target audience familiar with pip | Good -- 7.2K LOC, fast dev velocity |
+| Direct .tres/.tscn generation over GDScript codegen | Simpler, no Godot dependency, text format is stable and documented | Good -- all file manipulation works without Godot |
+| State machine parser over regex for Godot file format | Nested structures and multi-line values make regex fragile | Good -- round-trip fidelity achieved |
+| Custom parser over godot_parser library | Inactive 2+ years, Godot 4 issues, whitespace bugs | Good -- full control, zero external risk |
+| dataclasses over Pydantic | Internal data already validated by parser, 6x faster instantiation | Good -- no overhead, clean models |
+| GCD-based frame timing for Aseprite animations | Variable-duration frames need base FPS with per-frame multipliers | Good -- exact timing preservation |
+| Algorithmic peering bit generation | 256 bitmask combinations filtered by adjacency constraints | Good -- produces exact 47/16 valid patterns |
+| Apache-2.0 license | Permissive, compatible with Godot's MIT license, suitable for community tool | Good -- appropriate for community tool |
 
 ## Evolution
 
@@ -117,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after Phase 4 completion (all v1 phases complete)*
+*Last updated: 2026-03-29 after v1.0 milestone completion*

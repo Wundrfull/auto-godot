@@ -32,7 +32,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 **Requirements**: COMPAT-01, COMPAT-02, COMPAT-03, COMPAT-04, BACK-01, BACK-02
 **Success Criteria** (what must be TRUE):
   1. Running `gdauto sprite import-aseprite` produces .tres files without `load_steps` in the header
-  2. Running `gdauto scene create` produces .tscn files without `load_steps` and with `unique_id` on each node
+  2. Running `gdauto scene create` produces .tscn files without `load_steps`; parsing a .tscn with `unique_id` attributes preserves them on round-trip
   3. Parsing a Godot 4.6-saved .tscn file (with `unique_id` and no `load_steps`) and re-serializing it produces byte-identical output
   4. All golden file comparison tests pass against the updated output format
   5. Generated files (without `load_steps`) load without error in both Godot 4.5 and 4.6.1

@@ -54,7 +54,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- E2E validation tests (SpriteFrames, TileSet, scene load, atlas bounds, unique_id round-trip)
+- [x] 06-01-PLAN.md -- E2E validation tests (SpriteFrames, TileSet, scene load, atlas bounds, unique_id round-trip)
 - [ ] 06-02-PLAN.md -- README ecosystem section and Godot 4.5+ compatibility claims
 
 ## Progress
@@ -69,4 +69,4 @@ Phases execute in numeric order: 5 -> 6
 | 3. TileSet Automation and Export Pipeline | v1.0 | 4/4 | Complete | 2026-03-28 |
 | 4. Scene Commands, Test Suite, and Agent Discoverability | v1.0 | 3/3 | Complete | 2026-03-29 |
 | 5. Format Compatibility and Backwards Safety | v1.1 | 2/2 | Complete | 2026-03-29 |
-| 6. E2E Validation and Ecosystem Audit | v1.1 | 0/2 | In Progress | - |
+| 6. E2E Validation and Ecosystem Audit | v1.1 | 1/2 | In Progress | - |

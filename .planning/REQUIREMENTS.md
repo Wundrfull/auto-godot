@@ -20,9 +20,9 @@
 
 ### Validation and Testing
 
-- [ ] **VAL-01**: E2E tests pass against Godot 4.6.1 binary (SpriteFrames, TileSet, scene load tests)
-- [ ] **VAL-02**: TileSet atlas bounds validated under Godot 4.6 stricter checking (tiles outside texture rejected)
-- [ ] **VAL-03**: Round-trip fidelity verified for Godot 4.6-generated .tscn/.tres files (parse and re-serialize without spurious diffs)
+- [x] **VAL-01**: E2E tests pass against Godot 4.6.1 binary (SpriteFrames, TileSet, scene load tests)
+- [x] **VAL-02**: TileSet atlas bounds validated under Godot 4.6 stricter checking (tiles outside texture rejected)
+- [x] **VAL-03**: Round-trip fidelity verified for Godot 4.6-generated .tscn/.tres files (parse and re-serialize without spurious diffs)
 
 ### Ecosystem Audit
 
@@ -58,9 +58,9 @@ Deferred to v1.2+:
 | COMPAT-04 | Phase 5 | Complete |
 | BACK-01 | Phase 5 | Complete |
 | BACK-02 | Phase 5 | Complete |
-| VAL-01 | Phase 6 | Pending |
-| VAL-02 | Phase 6 | Pending |
-| VAL-03 | Phase 6 | Pending |
+| VAL-01 | Phase 6 | Complete |
+| VAL-02 | Phase 6 | Complete |
+| VAL-03 | Phase 6 | Complete |
 | ECO-01 | Phase 6 | Pending |
 | ECO-02 | Phase 6 | Pending |
 

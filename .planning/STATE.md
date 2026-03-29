@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Godot 4.6 Compatibility and Audit
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-29T06:06:39Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-03-29T06:08:42.469Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 2
   completed_plans: 3
-  percent: 50
+  percent: 100
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-29)
 ## Current Position
 
 Phase: 6 of 6 (e2e validation and ecosystem audit)
-Plan: 1 of 2 complete
+Plan: 2 of 2 complete
 Status: Executing
 Last activity: 2026-03-29
 
@@ -52,6 +52,7 @@ Progress: [█████░░░░░] 50%
 | Phase 04 P02 | 6min | 2 tasks | 5 files |
 | Phase 04 P03 | 6min | 2 tasks | 9 files |
 | Phase 06 P01 | 4min | 2 tasks | 3 files |
+| Phase 06 P02 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ All v1.0 decisions archived in PROJECT.md Key Decisions table and phase SUMMARY.
 - [Phase 05]: Set load_steps=None unconditionally in all generators; Godot 4.5 tolerates omission
 - [Phase 05]: unique_id stored as int; PackedVector4Array uses flat-float pattern
 - [Phase 05]: Normalization uses leading-space-anchored regex for load_steps and unique_id stripping
+- [Phase 06]: Ecosystem table uses category descriptions, not product names, to avoid staleness
+- [Phase 06]: CLI root help text is single source of truth for SKILL.md compatibility claim (4.5+ flows via to_info_dict)
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-29T06:06:39Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-29T06:08:42.464Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None

@@ -55,7 +55,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md -- E2E validation tests (SpriteFrames, TileSet, scene load, atlas bounds, unique_id round-trip)
-- [ ] 06-02-PLAN.md -- README ecosystem section and Godot 4.5+ compatibility claims
+- [x] 06-02-PLAN.md -- Ecosystem position and compatibility claims documentation
 
 ## Progress
 

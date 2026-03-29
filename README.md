@@ -2,11 +2,26 @@
 
 Agent-native CLI for the Godot game engine. Wraps Godot's headless mode and directly manipulates Godot's text-based file formats (`.tscn`, `.tres`, `project.godot`) to automate workflows that normally require the editor GUI.
 
-**7,200+ lines of source** | **648 tests** | **28 commands** | **No Godot binary required for file operations**
+**7,200+ lines of source** | **676 tests** | **28 commands** | **No Godot binary required for file operations**
 
 ## Why
 
 The Godot ecosystem has version managers, GDScript linters, CI Docker images, and MCP servers, but no headless CLI tool that bridges Aseprite exports to SpriteFrames or automates TileSet terrain configuration. godauto fills that gap.
+
+## Ecosystem Position
+
+godauto fills a specific gap in Godot tooling: headless, editor-free file generation and manipulation.
+
+| Need | Existing Solutions | godauto |
+|------|-------------------|---------|
+| GDScript quality | Linters and formatters (GDScript-focused) | Not covered (different domain) |
+| CI/CD export | Docker images with headless Godot | `gdauto export` wraps headless binary with retry logic |
+| Editor automation | MCP servers (require running editor instance) | No editor needed; direct file manipulation |
+| Aseprite to SpriteFrames | None | `gdauto sprite import-aseprite` |
+| TileSet terrain automation | None (manual editor work) | `gdauto tileset auto-terrain` |
+| Resource inspection | Editor only | `gdauto resource inspect --json` |
+
+No other tool generates SpriteFrames from Aseprite JSON or automates TileSet terrain peering bits without the Godot editor.
 
 ## Install
 
@@ -180,7 +195,7 @@ uv run pytest --cov=gdauto
 uv run pytest tests/e2e/ -v
 ```
 
-648 unit tests covering the parser, value types, Aseprite conversion, SpriteFrames builder, TileSet builder, terrain peering bits, export pipeline, scene builder, SKILL.md generator, golden file comparison, and CLI integration. 4 E2E tests validate generated resources in headless Godot (skipped when Godot is not available).
+668 unit tests covering the parser, value types, Aseprite conversion, SpriteFrames builder, TileSet builder, terrain peering bits, export pipeline, scene builder, SKILL.md generator, golden file comparison, and CLI integration. 8 E2E tests validate generated resources in headless Godot (skipped when Godot is not available).
 
 ## License
 

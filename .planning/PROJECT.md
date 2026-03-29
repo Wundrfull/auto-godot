@@ -7,6 +7,7 @@ gdauto is a feature-complete, agent-native command-line tool for the Godot game 
 ## Current State
 
 **v1.0 shipped 2026-03-29.** All 50 requirements validated across 4 phases, 16 plans.
+**v1.1 shipped 2026-03-29.** Godot 4.6 compatibility audit complete: 11 requirements validated across 2 phases, 4 plans.
 
 ## Current Milestone: v1.1 Godot 4.6 Compatibility and Audit
 
@@ -63,13 +64,19 @@ Validated in Phase 4: Scene Commands, Test Suite, and Agent Discoverability
 - [x] Golden file comparison tests with UID normalization against committed reference outputs
 - [x] Peering bit validation tests (blob-47: 376 bits, minimal-16: 64 bits)
 
+Validated in Phase 5: Format Compatibility and Backwards Safety
+- [x] Godot 4.6.1 file format compatibility: load_steps removed from all generators, unique_id preserved on round-trip
+- [x] Backwards compatibility layer: generated files load in both Godot 4.5 and 4.6.1
+- [x] Golden files updated to match Godot 4.6.1 output format
+
+Validated in Phase 6: E2E Validation and Ecosystem Audit
+- [x] E2E tests for Godot 4.6.1 binary validation (SpriteFrames, TileSet, scene, atlas bounds, round-trip)
+- [x] Ecosystem position documented in README (no competing headless CLI tools found)
+- [x] Godot 4.5+ compatibility claim in CLI help and README
+
 ### Active
 
-- [ ] Godot 4.6.1 file format compatibility audit
-- [ ] Godot 4.6.x CLI/headless mode change assessment
-- [ ] Backwards compatibility layer (4.5 baseline, 4.6.x forward support)
-- [ ] E2E and golden file updates for 4.6.1
-- [ ] Ecosystem gap re-evaluation (what exists now vs what we built)
+None -- v1.1 milestone complete.
 
 ### Out of Scope
 
@@ -139,4 +146,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after v1.1 milestone start (Godot 4.6 compatibility audit)*
+*Last updated: 2026-03-29 after v1.1 milestone completion (Godot 4.6 compatibility audit)*

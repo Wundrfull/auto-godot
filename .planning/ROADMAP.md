@@ -40,7 +40,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 Plans:
 - [x] 05-01-PLAN.md -- Parser and format layer changes (unique_id, PackedVector4Array, load_steps removal)
-- [ ] 05-02-PLAN.md -- Test infrastructure update and golden file regeneration
+- [x] 05-02-PLAN.md -- Test infrastructure update and golden file regeneration
 
 ### Phase 6: E2E Validation and Ecosystem Audit
 **Goal**: Confirmed compatibility with Godot 4.6.1 binary and documented ecosystem position

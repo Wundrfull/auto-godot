@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Godot 4.6 Compatibility and Audit
 status: verifying
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-29T05:12:14.444Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-03-29T05:20:07.562Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 2
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -60,6 +60,7 @@ All v1.0 decisions archived in PROJECT.md Key Decisions table and phase SUMMARY.
 
 - [Phase 05]: Set load_steps=None unconditionally in all generators; Godot 4.5 tolerates omission
 - [Phase 05]: unique_id stored as int; PackedVector4Array uses flat-float pattern
+- [Phase 05]: Normalization uses leading-space-anchored regex for load_steps and unique_id stripping
 
 ### Pending Todos
 
@@ -74,6 +75,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-29T05:12:14.441Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-29T05:20:07.560Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None

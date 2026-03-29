@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import sys
 import warnings
 from pathlib import Path
 from typing import Any
@@ -146,15 +145,16 @@ def _do_import_aseprite(
         )
         return
 
-    image_res_path = _resolve_image_path(res_path, aseprite_data.meta.image)
-
-    # Warn if res:// path is filename-only (no subdirectory)
-    if res_path is None and "/" not in aseprite_data.meta.image:
+    # Explicit zero-frames check so the warning is always in structured output
+    if len(aseprite_data.frames) == 0:
         warnings_list.append(
-            f"Using flat res:// path '{image_res_path}' (no subdirectory). "
-            "Use --res-path to specify the correct Godot resource path "
-            "if the image is not at the project root."
+            "Aseprite JSON contains zero frames; the generated SpriteFrames "
+            "will have no animation data"
         )
+
+    image_res_path = _resolve_image_path(
+        res_path, aseprite_data.meta.image, output,
+    )
 
     result = _build_resource(aseprite_data, image_res_path, warnings_list, ctx)
     if result is None:
@@ -169,10 +169,25 @@ def _do_import_aseprite(
     )
 
 
-def _resolve_image_path(res_path: str | None, meta_image: str) -> str:
-    """Determine the Godot res:// path for the sprite sheet texture."""
+def _resolve_image_path(
+    res_path: str | None, meta_image: str, output: str | None
+) -> str:
+    """Determine the Godot res:// path for the sprite sheet texture.
+
+    Priority: explicit --res-path > inferred from -o directory > flat filename.
+    When -o is a relative path with subdirectories (e.g., sprites/char.tres),
+    the image path is inferred as res://<output_dir>/<image_filename> so agents
+    get correct paths by default. Absolute output paths are not used for
+    inference since they are not valid Godot res:// paths.
+    """
     if res_path is not None:
         return res_path
+    if output is not None:
+        output_path = Path(output)
+        if not output_path.is_absolute():
+            output_dir = output_path.parent
+            if str(output_dir) != ".":
+                return "res://" + (output_dir / Path(meta_image).name).as_posix()
     return "res://" + meta_image
 
 
@@ -646,18 +661,14 @@ def validate(ctx: click.Context, tres_file: str, godot: bool) -> None:
         )
         result = validate_spriteframes_headless(tres_path, backend)
 
-    if not result["valid"]:
-        # In JSON mode, write the full result to stderr for consistency
-        # with the error contract (exit code 1 -> stderr)
-        config = ctx.obj
-        if config and config.json_mode:
-            sys.stderr.write(json.dumps(result, indent=2) + "\n")
-        else:
-            _print_validate_result(result)
-        ctx.exit(1)
-        return
-
+    # Validate always writes to stdout (both valid and invalid results).
+    # This differs from error commands which write to stderr. The validate
+    # result is structured data, not an error, so consumers should always
+    # read stdout and check the "valid" key regardless of exit code.
     emit(result, _print_validate_result, ctx)
+
+    if not result["valid"]:
+        ctx.exit(1)
 
 
 def _print_validate_result(data: dict[str, Any], verbose: bool = False) -> None:

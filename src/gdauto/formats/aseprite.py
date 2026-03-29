@@ -97,12 +97,6 @@ def parse_aseprite_json(path: Path) -> AsepriteData:
     raw = _load_json(path)
     _validate_has_frames(raw)
     frames = _parse_frames(raw["frames"])
-    if len(frames) == 0:
-        warnings.warn(
-            "Aseprite JSON contains zero frames; the generated SpriteFrames "
-            "will have no animation data. This is likely unintentional.",
-            stacklevel=2,
-        )
     meta = _parse_meta(raw.get("meta", {}))
     return AsepriteData(frames=frames, meta=meta)
 

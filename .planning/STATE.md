@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Live Game Interaction
-status: defining-requirements
-stopped_at: Defining requirements for v2.0
-last_updated: "2026-03-29T08:00:00.000Z"
+status: ready-to-plan
+stopped_at: Roadmap created, ready to plan Phase 7
+last_updated: "2026-03-29T09:00:00.000Z"
 last_activity: 2026-03-29
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 10
+  completed_phases: 6
+  total_plans: 20
+  completed_plans: 20
+  percent: 60
 ---
 
 # Project State
@@ -20,23 +20,42 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-29)
 
-**Core value:** Aseprite-to-SpriteFrames bridge: read Aseprite's JSON export and generate valid Godot .tres SpriteFrames resources with named animations, correct frame durations, atlas texture regions, and loop settings, entirely in Python with no Godot binary required.
-**Current focus:** Defining requirements for v2.0 Live Game Interaction
+**Core value:** Aseprite-to-SpriteFrames bridge (v1.0); Live game interaction via debugger protocol (v2.0)
+**Current focus:** Phase 7: Variant Codec and TCP Connection
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: --
-Status: Defining requirements
-Last activity: 2026-03-29 -- Milestone v2.0 started
+Phase: 7 of 10 (Variant Codec and TCP Connection)
+Plan: 0 of 0 in current phase (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-29 -- Roadmap created for v2.0 milestone
+
+Progress: [############........] 60% (6/10 phases complete; 20/20 v1.0+v1.1 plans done)
 
 ## Shipped Milestones
 
 - v1.0 MVP (2026-03-29): 4 phases, 16 plans, 28 commands, 648 tests
 - v1.1 Godot 4.6 Compatibility (2026-03-29): 2 phases, 4 plans, 676 tests
 
+## Accumulated Context
+
+### Decisions
+
+- [v2.0 research]: gdauto is TCP server, not client; game connects TO gdauto
+- [v2.0 research]: Zero new pip dependencies; all stdlib (asyncio, struct, subprocess)
+- [v2.0 research]: asyncio.run() at Click boundary; existing 28 commands stay synchronous
+- [v2.0 research]: GDScript autoload bridge for input injection (no custom Godot fork)
+- [v2.0 research]: pause + inject + step + assert as canonical deterministic test pattern
+
+### Blockers/Concerns
+
+- Variant encoding byte alignment: silent message drops with no diagnostic from Godot if wrong
+- Bridge script cleanup on crash: orphaned autoload entries corrupt user's project.godot
+- Input injection timing: events queue for next frame, immediate assertions are flaky
+- Scene tree response binary layout: undocumented, needs empirical reverse-engineering
+
 ## Session Continuity
 
 Last session: 2026-03-29
-Stopped at: Defining requirements for v2.0
+Stopped at: v2.0 roadmap created, ready to plan Phase 7
 Resume file: None

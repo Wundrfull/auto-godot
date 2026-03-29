@@ -88,31 +88,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROTO-01 | -- | Pending |
-| PROTO-02 | -- | Pending |
-| PROTO-03 | -- | Pending |
-| PROTO-04 | -- | Pending |
-| PROTO-05 | -- | Pending |
-| SCENE-01 | -- | Pending |
-| SCENE-02 | -- | Pending |
-| SCENE-03 | -- | Pending |
-| INTERACT-01 | -- | Pending |
-| INTERACT-02 | -- | Pending |
-| INTERACT-03 | -- | Pending |
-| INTERACT-04 | -- | Pending |
-| EXEC-01 | -- | Pending |
-| EXEC-02 | -- | Pending |
-| EXEC-03 | -- | Pending |
-| VERIFY-01 | -- | Pending |
-| VERIFY-02 | -- | Pending |
-| VERIFY-03 | -- | Pending |
-| VERIFY-04 | -- | Pending |
+| PROTO-01 | Phase 7 | Pending |
+| PROTO-02 | Phase 7 | Pending |
+| PROTO-03 | Phase 7 | Pending |
+| PROTO-04 | Phase 7 | Pending |
+| PROTO-05 | Phase 7 | Pending |
+| SCENE-01 | Phase 8 | Pending |
+| SCENE-02 | Phase 8 | Pending |
+| SCENE-03 | Phase 8 | Pending |
+| EXEC-01 | Phase 8 | Pending |
+| EXEC-02 | Phase 8 | Pending |
+| EXEC-03 | Phase 8 | Pending |
+| INTERACT-01 | Phase 9 | Pending |
+| INTERACT-02 | Phase 9 | Pending |
+| INTERACT-03 | Phase 9 | Pending |
+| INTERACT-04 | Phase 9 | Pending |
+| VERIFY-01 | Phase 10 | Pending |
+| VERIFY-02 | Phase 10 | Pending |
+| VERIFY-03 | Phase 10 | Pending |
+| VERIFY-04 | Phase 10 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-29*
-*Last updated: 2026-03-29 after initial definition*
+*Last updated: 2026-03-29 after roadmap creation*

@@ -26,8 +26,8 @@
 
 ### Ecosystem Audit
 
-- [ ] **ECO-01**: Document which godauto capabilities remain unique vs what ecosystem tools now provide (Godot MCP servers, editor plugins, other CLI tools)
-- [ ] **ECO-02**: Update SKILL.md output and README with Godot 4.6.1 compatibility claims
+- [x] **ECO-01**: Document which godauto capabilities remain unique vs what ecosystem tools now provide (Godot MCP servers, editor plugins, other CLI tools)
+- [x] **ECO-02**: Update SKILL.md output and README with Godot 4.6.1 compatibility claims
 
 ## Future Requirements
 
@@ -61,8 +61,8 @@ Deferred to v1.2+:
 | VAL-01 | Phase 6 | Pending |
 | VAL-02 | Phase 6 | Pending |
 | VAL-03 | Phase 6 | Pending |
-| ECO-01 | Phase 6 | Pending |
-| ECO-02 | Phase 6 | Pending |
+| ECO-01 | Phase 6 | Complete |
+| ECO-02 | Phase 6 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 11 total

@@ -12,8 +12,8 @@ Requirements for Live Game Interaction milestone. Each maps to roadmap phases.
 - [x] **PROTO-01**: Variant binary codec encodes and decodes all Godot types needed for debugger communication (null, bool, int, float, String, StringName, Vector2, Vector3, Color, NodePath, Object, Array, Dictionary)
 - [x] **PROTO-02**: TCP server accepts incoming Godot debugger connections with length-prefixed binary framing
 - [x] **PROTO-03**: Background receive loop drains unsolicited messages (performance, output, errors) to prevent TCP buffer flooding
-- [ ] **PROTO-04**: Game launch integrates with existing GodotBackend, adding non-blocking subprocess with --remote-debug flag
-- [ ] **PROTO-05**: Connection lifecycle manages connect, readiness detection, timeout, and clean disconnect
+- [x] **PROTO-04**: Game launch integrates with existing GodotBackend, adding non-blocking subprocess with --remote-debug flag
+- [x] **PROTO-05**: Connection lifecycle manages connect, readiness detection, timeout, and clean disconnect
 
 ### Scene Inspection
 
@@ -91,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROTO-01 | Phase 7 | Complete |
 | PROTO-02 | Phase 7 | Complete |
 | PROTO-03 | Phase 7 | Complete |
-| PROTO-04 | Phase 7 | Pending |
-| PROTO-05 | Phase 7 | Pending |
+| PROTO-04 | Phase 7 | Complete |
+| PROTO-05 | Phase 7 | Complete |
 | SCENE-01 | Phase 8 | Pending |
 | SCENE-02 | Phase 8 | Pending |
 | SCENE-03 | Phase 8 | Pending |

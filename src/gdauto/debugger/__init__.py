@@ -7,6 +7,12 @@ from gdauto.debugger.errors import (
     DebuggerTimeoutError,
     ProtocolError,
 )
+from gdauto.debugger.inspector import (
+    format_error_messages,
+    format_output_messages,
+    get_property,
+    get_scene_tree,
+)
 from gdauto.debugger.models import GameState, NodeProperty, SceneNode, SessionInfo
 from gdauto.debugger.session import DebugSession
 from gdauto.debugger.session_file import (
@@ -32,6 +38,10 @@ __all__ = [
     "cleanup_session",
     "decode",
     "encode",
+    "format_error_messages",
+    "format_output_messages",
+    "get_property",
+    "get_scene_tree",
     "read_session_file",
     "write_session_file",
 ]

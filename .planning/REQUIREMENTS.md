@@ -17,9 +17,9 @@ Requirements for Live Game Interaction milestone. Each maps to roadmap phases.
 
 ### Scene Inspection
 
-- [ ] **SCENE-01**: User can retrieve the live scene tree as structured JSON showing all nodes, types, and paths
-- [ ] **SCENE-02**: User can read any node property by NodePath (e.g., /root/Main/ScoreLabel.text)
-- [ ] **SCENE-03**: User can capture game print() output and runtime errors through the debugger connection
+- [x] **SCENE-01**: User can retrieve the live scene tree as structured JSON showing all nodes, types, and paths
+- [x] **SCENE-02**: User can read any node property by NodePath (e.g., /root/Main/ScoreLabel.text)
+- [x] **SCENE-03**: User can capture game print() output and runtime errors through the debugger connection
 
 ### Game Interaction
 
@@ -30,9 +30,9 @@ Requirements for Live Game Interaction milestone. Each maps to roadmap phases.
 
 ### Execution Control
 
-- [ ] **EXEC-01**: User can pause and resume the running game
-- [ ] **EXEC-02**: User can step one frame at a time while paused
-- [ ] **EXEC-03**: User can set game speed (e.g., 10x for fast-forwarding idle timers)
+- [x] **EXEC-01**: User can pause and resume the running game
+- [x] **EXEC-02**: User can step one frame at a time while paused
+- [x] **EXEC-03**: User can set game speed (e.g., 10x for fast-forwarding idle timers)
 
 ### Verification Layer
 
@@ -93,12 +93,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROTO-03 | Phase 7 | Complete |
 | PROTO-04 | Phase 7 | Complete |
 | PROTO-05 | Phase 7 | Complete |
-| SCENE-01 | Phase 8 | Pending |
-| SCENE-02 | Phase 8 | Pending |
-| SCENE-03 | Phase 8 | Pending |
-| EXEC-01 | Phase 8 | Pending |
-| EXEC-02 | Phase 8 | Pending |
-| EXEC-03 | Phase 8 | Pending |
+| SCENE-01 | Phase 8 | Complete |
+| SCENE-02 | Phase 8 | Complete |
+| SCENE-03 | Phase 8 | Complete |
+| EXEC-01 | Phase 8 | Complete |
+| EXEC-02 | Phase 8 | Complete |
+| EXEC-03 | Phase 8 | Complete |
 | INTERACT-01 | Phase 9 | Pending |
 | INTERACT-02 | Phase 9 | Pending |
 | INTERACT-03 | Phase 9 | Pending |

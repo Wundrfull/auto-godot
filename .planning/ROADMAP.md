@@ -63,7 +63,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
   4. User can pause, resume, single-step one frame, and set game speed (e.g., 10x) through CLI commands, enabling the `pause + inject + step + assert` deterministic testing pattern
 **Plans:** 3 plans
 Plans:
-- [ ] 08-01-PLAN.md -- Data models, session enhancements, session file persistence
+- [x] 08-01-PLAN.md -- Data models, session enhancements, session file persistence
 - [ ] 08-02-PLAN.md -- Scene inspection commands (tree, get, output)
 - [ ] 08-03-PLAN.md -- Execution control commands (pause, resume, step, speed)
 

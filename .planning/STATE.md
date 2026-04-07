@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Live Game Interaction
-status: verifying
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-06T14:26:08.675Z"
-last_activity: 2026-04-06
+status: executing
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-07T03:45:21.485Z"
+last_activity: 2026-04-07
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 60
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Aseprite-to-SpriteFrames bridge (v1.0); Live game interaction via debugger protocol (v2.0)
-**Current focus:** Phase 7: Variant Codec and TCP Connection
+**Current focus:** Phase 08 — scene-inspection-and-execution-control
 
 ## Current Position
 
-Phase: 8 of 10 (scene inspection and execution control)
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-06
+Phase: 08 (scene-inspection-and-execution-control) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-07
 
 Progress: [############........] 60% (6/10 phases complete; 20/20 v1.0+v1.1 plans done)
 
@@ -53,6 +53,10 @@ Progress: [############........] 60% (6/10 phases complete; 20/20 v1.0+v1.1 plan
 - [Phase 07]: asyncio.run() at Click boundary; async_connect is fully async internally
 - [Phase 07]: Readiness polling uses exponential backoff (0.5s to 16s) for scene tree
 - [Phase 07]: launch_game() uses Popen (not run) and omits --headless for windowed game
+- [Phase 08]: SceneNode is mutable (not frozen) because children list is built incrementally during tree parsing
+- [Phase 08]: send_fire_and_forget is a public method so downstream modules use it without accessing private fields
+- [Phase 08]: Extended fields (class_name, script_path, groups) omitted from to_dict() when at default values for clean output
+- [Phase 08]: Session file tracks game PID to prevent duplicate launches; true cross-process reuse deferred to daemon architecture
 
 ### Blockers/Concerns
 
@@ -63,6 +67,6 @@ Progress: [############........] 60% (6/10 phases complete; 20/20 v1.0+v1.1 plan
 
 ## Session Continuity
 
-Last session: 2026-04-06T14:26:08.671Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-scene-inspection-and-execution-control/08-CONTEXT.md
+Last session: 2026-04-07T03:45:21.481Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None

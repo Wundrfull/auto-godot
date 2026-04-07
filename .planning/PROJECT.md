@@ -9,6 +9,7 @@ gdauto is a feature-complete, agent-native command-line tool for the Godot game 
 **v1.0 shipped 2026-03-29.** All 50 requirements validated across 4 phases, 16 plans.
 **v1.1 shipped 2026-03-29.** Godot 4.6 compatibility audit complete: 11 requirements validated across 2 phases, 4 plans.
 **v2.0 Phase 7 complete 2026-04-06.** Variant binary codec (24+ types), TCP session, debug connect command: 5 requirements validated across 3 plans.
+**v2.0 Phase 8 complete 2026-04-07.** Scene inspection (tree, get, output) and execution control (pause, resume, step, speed): 6 requirements validated across 3 plans. 1005 tests passing.
 
 ## Current Milestone: v2.0 Live Game Interaction
 
@@ -83,9 +84,17 @@ Validated in Phase 7: Variant Codec and TCP Connection
 - [x] Game launch integrates with existing GodotBackend, adding non-blocking subprocess with --remote-debug flag (PROTO-04)
 - [x] Connection lifecycle manages connect, readiness detection, timeout, and clean disconnect (PROTO-05)
 
+Validated in Phase 8: Scene Inspection and Execution Control
+- [x] Live scene tree retrieval as nested JSON with node types, paths, and metadata; --full flag for extended fields via secondary inspect (SCENE-01)
+- [x] Node property reading by NodePath via debugger inspect_objects protocol (SCENE-02)
+- [x] Game output capture (print() and errors) with snapshot and --follow modes (SCENE-03)
+- [x] Pause and resume game execution via debugger protocol (EXEC-01)
+- [x] Single-frame stepping with auto-pause behavior (EXEC-02)
+- [x] Game speed control via Engine.time_scale with positional multiplier argument (EXEC-03)
+
 ### Active
 
-(Remaining v2.0 requirements: SCENE-01 through SCENE-03, EXEC-01 through EXEC-03, INTERACT-01 through INTERACT-04, VERIFY-01 through VERIFY-04)
+(Remaining v2.0 requirements: INTERACT-01 through INTERACT-04, VERIFY-01 through VERIFY-04)
 
 ### Out of Scope
 
@@ -155,4 +164,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after Phase 7 completion*
+*Last updated: 2026-04-07 after Phase 8 completion*

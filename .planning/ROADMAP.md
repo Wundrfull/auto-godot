@@ -61,7 +61,11 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
   2. Running `gdauto debug get --node /root/Main/ScoreLabel --property text` returns the current value of any node property by NodePath
   3. Running `gdauto debug output` captures game `print()` output and runtime errors through the debugger connection
   4. User can pause, resume, single-step one frame, and set game speed (e.g., 10x) through CLI commands, enabling the `pause + inject + step + assert` deterministic testing pattern
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 08-01-PLAN.md -- Data models, session enhancements, session file persistence
+- [ ] 08-02-PLAN.md -- Scene inspection commands (tree, get, output)
+- [ ] 08-03-PLAN.md -- Execution control commands (pause, resume, step, speed)
 
 ### Phase 9: Game Interaction and Bridge System
 **Goal**: Users can modify game state and inject player input programmatically, with the bridge script infrastructure managed automatically
@@ -99,6 +103,6 @@ Phases execute in numeric order: 7 -> 8 -> 9 -> 10
 | 5. Format Compatibility and Backwards Safety | v1.1 | 2/2 | Complete | 2026-03-29 |
 | 6. E2E Validation and Ecosystem Audit | v1.1 | 2/2 | Complete | 2026-03-29 |
 | 7. Variant Codec and TCP Connection | v2.0 | 3/3 | Complete   | 2026-04-06 |
-| 8. Scene Inspection and Execution Control | v2.0 | 0/0 | Not started | - |
+| 8. Scene Inspection and Execution Control | v2.0 | 0/3 | In progress | - |
 | 9. Game Interaction and Bridge System | v2.0 | 0/0 | Not started | - |
 | 10. Verification Layer and End-to-End Validation | v2.0 | 0/0 | Not started | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Live Game Interaction
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-07T03:45:21.485Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-07T03:58:59.379Z"
 last_activity: 2026-04-07
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 60
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-29)
 ## Current Position
 
 Phase: 08 (scene-inspection-and-execution-control) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-07
 
@@ -57,6 +57,8 @@ Progress: [############........] 60% (6/10 phases complete; 20/20 v1.0+v1.1 plan
 - [Phase 08]: send_fire_and_forget is a public method so downstream modules use it without accessing private fields
 - [Phase 08]: Extended fields (class_name, script_path, groups) omitted from to_dict() when at default values for clean output
 - [Phase 08]: Session file tracks game PID to prevent duplicate launches; true cross-process reuse deferred to daemon architecture
+- [Phase 08]: _run_with_session auto-connect helper for inspection commands (direct session access needed, async_connect returns ConnectResult only)
+- [Phase 08]: Groups not available via inspect_objects; left as empty list with TODO for future protocol message
 
 ### Blockers/Concerns
 
@@ -67,6 +69,6 @@ Progress: [############........] 60% (6/10 phases complete; 20/20 v1.0+v1.1 plan
 
 ## Session Continuity
 
-Last session: 2026-04-07T03:45:21.481Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-04-07T03:58:59.375Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None

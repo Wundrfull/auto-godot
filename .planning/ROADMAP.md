@@ -64,7 +64,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 **Plans:** 3 plans
 Plans:
 - [x] 08-01-PLAN.md -- Data models, session enhancements, session file persistence
-- [ ] 08-02-PLAN.md -- Scene inspection commands (tree, get, output)
+- [x] 08-02-PLAN.md -- Scene inspection commands (tree, get, output)
 - [ ] 08-03-PLAN.md -- Execution control commands (pause, resume, step, speed)
 
 ### Phase 9: Game Interaction and Bridge System

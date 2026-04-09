@@ -2038,3 +2038,121 @@ def find_nodes(
             ),
             ctx,
         )
+
+
+# ---------------------------------------------------------------------------
+# scene validate
+# ---------------------------------------------------------------------------
+
+
+@scene.command("validate")
+@click.argument("scene_path", type=click.Path(exists=True))
+@click.pass_context
+def validate_scene(ctx: click.Context, scene_path: str) -> None:
+    """Validate a .tscn scene file structure.
+
+    Checks: parseable, has root node, parent references are valid,
+    ext_resource IDs referenced by nodes exist, no duplicate node names
+    at the same parent level.
+
+    Examples:
+
+      gdauto scene validate scenes/main.tscn
+    """
+    try:
+        path = Path(scene_path)
+        text = path.read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+
+        warnings: list[str] = []
+        errors: list[str] = []
+
+        # Check: has at least one node
+        if not scene_data.nodes:
+            errors.append("Scene has no nodes")
+
+        # Check: root node exists (parent is None or ".")
+        root_nodes = [n for n in scene_data.nodes if n.parent is None]
+        if not root_nodes:
+            errors.append("No root node found (node with parent=None)")
+
+        # Check: all parent references resolve to existing nodes
+        node_paths: set[str] = set()
+        for node in scene_data.nodes:
+            if node.parent is None:
+                node_paths.add(node.name)
+            elif node.parent == ".":
+                node_paths.add(node.name)
+            else:
+                node_paths.add(f"{node.parent}/{node.name}")
+
+        for node in scene_data.nodes:
+            if node.parent and node.parent != ".":
+                # Check parent path resolves
+                if node.parent not in node_paths:
+                    # Parent might be the root node name which has parent=None
+                    root_names = {n.name for n in scene_data.nodes if n.parent is None}
+                    if node.parent not in root_names:
+                        warnings.append(
+                            f"Node '{node.name}' references parent '{node.parent}' "
+                            f"which may not exist"
+                        )
+
+        # Check: ext_resource references in node properties resolve
+        ext_ids = {ext.id for ext in scene_data.ext_resources}
+        for node in scene_data.nodes:
+            for prop, val in node.properties.items():
+                val_str = str(val)
+                if "ExtResource(" in val_str:
+                    import re
+                    for ref_id in re.findall(r'ExtResource\("([^"]+)"\)', val_str):
+                        if ref_id not in ext_ids:
+                            errors.append(
+                                f"Node '{node.name}'.{prop} references "
+                                f"ExtResource('{ref_id}') which does not exist"
+                            )
+
+        # Check: no duplicate names at same parent level
+        seen: dict[str, set[str]] = {}
+        for node in scene_data.nodes:
+            parent = node.parent or "__root__"
+            if parent not in seen:
+                seen[parent] = set()
+            if node.name in seen[parent]:
+                warnings.append(f"Duplicate node name '{node.name}' under parent '{parent}'")
+            seen[parent].add(node.name)
+
+        valid = len(errors) == 0
+        data = {
+            "valid": valid,
+            "errors": errors,
+            "warnings": warnings,
+            "node_count": len(scene_data.nodes),
+            "ext_resource_count": len(scene_data.ext_resources),
+            "scene": scene_path,
+        }
+
+        if not valid:
+            raise ProjectError(
+                message=f"Scene validation failed: {'; '.join(errors)}",
+                code="SCENE_INVALID",
+                fix="Fix the listed errors in the scene file",
+            )
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Valid: {data['scene']} ({data['node_count']} nodes, {data['ext_resource_count']} resources)")
+            for w in data["warnings"]:
+                click.echo(f"  WARNING: {w}")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to parse scene: {exc}",
+                code="PARSE_ERROR",
+                fix="Ensure the file is a valid .tscn scene file",
+            ),
+            ctx,
+        )

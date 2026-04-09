@@ -725,6 +725,17 @@ def run_pipeline(base_dir: Path) -> PipelineRunner:
     p.run("List main resources", "resource",
           ["resource", "list", "--scene", ms])
 
+    # ── Phase 26: File Validation ───────────────────────────────────
+    # Verify the generated scene files are structurally valid
+    p.run("Validate main scene structure", "scene",
+          ["scene", "validate", ms])
+
+    p.run("Validate shop scene structure", "scene",
+          ["scene", "validate", str(project_dir / "scenes" / "shop.tscn")])
+
+    p.run("Validate HUD scene structure", "scene",
+          ["scene", "validate", str(project_dir / "scenes" / "hud.tscn")])
+
     # Final scene listing
     p.run("List all scenes", "scene",
           ["scene", "list", pd])

@@ -1,5 +1,5 @@
-# Pipeline Blockers Log - 2026-04-09T15:37:19Z
-# Score: 117/117
+# Pipeline Blockers Log - 2026-04-09T15:39:00Z
+# Score: 120/120
 
 ## Summary by Category
   animation: 2/2 [PASS]
@@ -8,7 +8,7 @@
   preset: 2/2 [PASS]
   project: 19/19 [PASS]
   resource: 5/5 [PASS]
-  scene: 53/53 [PASS]
+  scene: 56/56 [PASS]
   script: 25/25 [PASS]
   shader: 2/2 [PASS]
   signal: 3/3 [PASS]
@@ -16,7 +16,7 @@
 
 ## No blockers! All steps passed.
 
-## Passed (117 steps)
+## Passed (120 steps)
   OK: Create project [project]
   OK: Set display 720x1280 portrait [project]
   OK: Set rendering to mobile [project]
@@ -126,6 +126,9 @@
   OK: Inspect main root [scene]
   OK: List main types [scene]
   OK: List main resources [resource]
+  OK: Validate main scene structure [scene]
+  OK: Validate shop scene structure [scene]
+  OK: Validate HUD scene structure [scene]
   OK: List all scenes [scene]
   OK: List nodes in main scene [scene]
   OK: Inspect main scene [resource]

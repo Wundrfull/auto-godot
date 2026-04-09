@@ -19,6 +19,7 @@ from gdauto.commands.animation import animation
 from gdauto.commands.audio import audio
 from gdauto.commands.debug import debug
 from gdauto.commands.export import export
+from gdauto.commands.physics import physics
 from gdauto.commands.project import project
 from gdauto.commands.resource import resource
 from gdauto.commands.scene import scene
@@ -122,6 +123,7 @@ cli.add_command(debug)
 cli.add_command(project)
 cli.add_command(resource)
 cli.add_command(export)
+cli.add_command(physics)
 cli.add_command(sprite)
 cli.add_command(tileset)
 cli.add_command(scene)

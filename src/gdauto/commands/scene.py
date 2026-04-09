@@ -1953,3 +1953,88 @@ def _set_template_property(
                 return True
         return False
     _walk(definition.get("root", {}))
+
+
+# ---------------------------------------------------------------------------
+# scene find-nodes
+# ---------------------------------------------------------------------------
+
+
+@scene.command("find-nodes")
+@click.option("--scene", "scene_path", required=True, type=click.Path(exists=True),
+              help="Path to the .tscn scene file")
+@click.option("--type", "node_type", default=None, help="Filter by node type")
+@click.option("--property", "prop_name", default=None, help="Filter by property name (nodes that have this property)")
+@click.option("--group", "group_name", default=None, help="Filter by group membership")
+@click.pass_context
+def find_nodes(
+    ctx: click.Context,
+    scene_path: str,
+    node_type: str | None,
+    prop_name: str | None,
+    group_name: str | None,
+) -> None:
+    """Find nodes matching criteria in a scene file.
+
+    Examples:
+
+      gdauto scene find-nodes --scene scenes/main.tscn --type Button
+
+      gdauto scene find-nodes --scene scenes/main.tscn --property text
+
+      gdauto scene find-nodes --scene scenes/main.tscn --group enemies
+    """
+    try:
+        path = Path(scene_path)
+        text = path.read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+
+        matches: list[dict[str, Any]] = []
+        for node in scene_data.nodes:
+            if node_type and node.type != node_type:
+                continue
+            if prop_name and prop_name not in node.properties:
+                continue
+            if group_name and (not node.groups or group_name not in node.groups):
+                continue
+            info: dict[str, Any] = {
+                "name": node.name,
+                "type": node.type,
+                "parent": node.parent,
+            }
+            if prop_name and prop_name in node.properties:
+                val = node.properties[prop_name]
+                try:
+                    info["value"] = serialize_value(val) if not isinstance(val, str) else val
+                except Exception:
+                    info["value"] = str(val)
+            matches.append(info)
+
+        data = {"matches": matches, "count": len(matches), "scene": scene_path}
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            filters = []
+            if node_type:
+                filters.append(f"type={node_type}")
+            if prop_name:
+                filters.append(f"property={prop_name}")
+            if group_name:
+                filters.append(f"group={group_name}")
+            filter_str = ", ".join(filters) if filters else "all"
+            click.echo(f"Found {data['count']} nodes ({filter_str}) in {data['scene']}:")
+            for m in data["matches"]:
+                parent_str = f" parent={m['parent']}" if m["parent"] else ""
+                type_str = f" [{m['type']}]" if m.get("type") else ""
+                val_str = f" = {m['value']}" if "value" in m else ""
+                click.echo(f"  {m['name']}{type_str}{parent_str}{val_str}")
+
+        emit(data, _human, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to search scene: {exc}",
+                code="PARSE_ERROR",
+                fix="Ensure the file is a valid .tscn scene file",
+            ),
+            ctx,
+        )

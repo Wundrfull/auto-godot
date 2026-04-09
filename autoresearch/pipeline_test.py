@@ -624,7 +624,16 @@ def run_pipeline(base_dir: Path) -> PipelineRunner:
            "--ready", "--physics",
            str(scripts_dir / "player.gd")])
 
-    # ── Phase 21: Full Inspection ───────────────────────────────────
+    # ── Phase 21: Search and Query ─────────────────────────────────
+    # Find all buttons in the main scene
+    p.run("Find nodes by type", "scene",
+          ["scene", "find-nodes", "--scene", ms, "--type", "Button"])
+
+    # Find all nodes with a specific property value
+    p.run("Find nodes with property", "scene",
+          ["scene", "find-nodes", "--scene", ms, "--property", "text"])
+
+    # ── Phase 22: Full Inspection ───────────────────────────────────
     p.run("List scenes in project", "scene",
           ["scene", "list", pd])
 

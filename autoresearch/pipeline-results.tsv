@@ -2,3 +2,5 @@ iteration	timestamp	metric	best	kept	guard	commit	description
 0	2026-04-09T11:20:00-04:00	58	58	baseline	pass	n/a	Baseline: 58/65 pipeline steps pass. 7 blockers: scene set-resource, project set-main-scene, scene rename-node, scene reorder-node, resource list, project set-config
 1	2026-04-09T11:22:00-04:00	65	65	keep	pass	fe69ee4	+7: project set-config, set-main-scene, scene rename-node, reorder-node, set-resource, resource list
 2	2026-04-09T11:26:00-04:00	79	79	keep	pass	75a58b4	+14: scene create-simple, inspect-node, move-node, list-types, copy-properties, set-anchor, from-template; script add-method/var/export/signal; project add-plugin
+3	2026-04-09T11:30:00-04:00	85	85	keep	pass	f5d49d1	+6: script list-methods, list-vars; scene count-nodes; pipeline expanded to 85 steps
+4	2026-04-09T11:33:00-04:00	96	96	keep	pass	51f1aef	+11: expanded pipeline with shop scene, player scene, cross-scene composition. 96 total steps

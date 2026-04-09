@@ -532,7 +532,35 @@ def run_pipeline(base_dir: Path) -> PipelineRunner:
            "--output", ui_scene,
            "--title", "Upgrades"])
 
-    # ── Phase 16: Inspection & Validation ───────────────────────────
+    # ── Phase 16: Script Content Validation ──────────────────────────
+    # Read the generated main.gd to verify the edits landed
+    p.run("List script methods", "script",
+          ["script", "list-methods", str(scripts_dir / "main.gd")])
+
+    p.run("List script variables", "script",
+          ["script", "list-vars", str(scripts_dir / "main.gd")])
+
+    # ── Phase 17: Advanced Project Config ────────────────────────────
+    # Set window title via set-config
+    p.run("Set window title", "project",
+          ["project", "set-config", "--section", "application",
+           "--key", "config/name", "--value", '"Idle Clicker"', pg])
+
+    # Set icon path
+    p.run("Set project icon", "project",
+          ["project", "set-config", "--section", "application",
+           "--key", "config/icon", "--value", '"res://icon.svg"', pg])
+
+    # ── Phase 18: Scene Tree Operations ──────────────────────────────
+    # Count total nodes across all scenes
+    p.run("Count nodes across project", "scene",
+          ["scene", "count-nodes", pd])
+
+    # Get scene tree as JSON (global --json flag before subcommand)
+    p.run("Get scene tree JSON", "scene",
+          ["--json", "scene", "list-nodes", ms])
+
+    # ── Phase 19: Inspection & Validation ───────────────────────────
     p.run("List scenes in project", "scene",
           ["scene", "list", pd])
 

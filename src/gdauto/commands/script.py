@@ -615,3 +615,122 @@ def add_signal(
         emit(data, _human, ctx)
     except ProjectError as exc:
         emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
+# script list-methods
+# ---------------------------------------------------------------------------
+
+
+@script.command("list-methods")
+@click.argument("file_path", type=click.Path(exists=True))
+@click.pass_context
+def list_methods(ctx: click.Context, file_path: str) -> None:
+    """List all methods in a GDScript file.
+
+    Examples:
+
+      gdauto script list-methods scripts/main.gd
+    """
+    import re
+    try:
+        path = Path(file_path)
+        text = path.read_text(encoding="utf-8")
+        lines = text.split("\n")
+
+        methods: list[dict[str, str]] = []
+        for i, line in enumerate(lines):
+            match = re.match(r'^func\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*(\w+))?', line)
+            if match:
+                methods.append({
+                    "name": match.group(1),
+                    "params": match.group(2).strip(),
+                    "return_type": match.group(3) or "void",
+                    "line": str(i + 1),
+                })
+
+        data = {"methods": methods, "count": len(methods), "file": file_path}
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Methods in {data['file']} ({data['count']}):")
+            for m in data["methods"]:
+                params = f"({m['params']})" if m["params"] else "()"
+                click.echo(f"  L{m['line']}: {m['name']}{params} -> {m['return_type']}")
+            if not data["methods"]:
+                click.echo("  (none)")
+
+        emit(data, _human, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to read script: {exc}",
+                code="SCRIPT_READ_ERROR",
+                fix="Check the file path",
+            ),
+            ctx,
+        )
+
+
+# ---------------------------------------------------------------------------
+# script list-vars
+# ---------------------------------------------------------------------------
+
+
+@script.command("list-vars")
+@click.argument("file_path", type=click.Path(exists=True))
+@click.pass_context
+def list_vars(ctx: click.Context, file_path: str) -> None:
+    """List all variables in a GDScript file.
+
+    Shows var, @export, @onready, and const declarations.
+
+    Examples:
+
+      gdauto script list-vars scripts/main.gd
+    """
+    import re
+    try:
+        path = Path(file_path)
+        text = path.read_text(encoding="utf-8")
+        lines = text.split("\n")
+
+        variables: list[dict[str, str]] = []
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            # Match: var name: Type = value, @export var ..., @onready var ..., const ...
+            for prefix in ("@export var ", "@onready var ", "var ", "const "):
+                if stripped.startswith(prefix):
+                    rest = stripped[len(prefix):]
+                    # Extract name
+                    name_match = re.match(r'(\w+)', rest)
+                    if name_match:
+                        kind = "export" if prefix.startswith("@export") else \
+                               "onready" if prefix.startswith("@onready") else \
+                               "const" if prefix.startswith("const") else "var"
+                        variables.append({
+                            "name": name_match.group(1),
+                            "kind": kind,
+                            "declaration": stripped,
+                            "line": str(i + 1),
+                        })
+                    break
+
+        data = {"variables": variables, "count": len(variables), "file": file_path}
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Variables in {data['file']} ({data['count']}):")
+            for v in data["variables"]:
+                click.echo(f"  L{v['line']}: [{v['kind']}] {v['declaration']}")
+            if not data["variables"]:
+                click.echo("  (none)")
+
+        emit(data, _human, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to read script: {exc}",
+                code="SCRIPT_READ_ERROR",
+                fix="Check the file path",
+            ),
+            ctx,
+        )

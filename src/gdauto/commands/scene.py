@@ -1180,6 +1180,64 @@ def list_nodes(ctx: click.Context, scene_path: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# scene count-nodes
+# ---------------------------------------------------------------------------
+
+
+@scene.command("count-nodes")
+@click.argument("path", default=".", type=click.Path())
+@click.pass_context
+def count_nodes(ctx: click.Context, path: str) -> None:
+    """Count total nodes across all scenes in a project.
+
+    Examples:
+
+      gdauto scene count-nodes .
+    """
+    try:
+        from gdauto.errors import ProjectError as ProjErr
+        project_dir = Path(path)
+        if not (project_dir / "project.godot").exists():
+            if project_dir.name == "project.godot":
+                project_dir = project_dir.parent
+            if not (project_dir / "project.godot").exists():
+                raise ProjectError(
+                    message=f"Not a Godot project directory: {path}",
+                    code="PROJECT_NOT_FOUND",
+                    fix="Run from a directory containing project.godot",
+                )
+
+        scene_files = list(project_dir.rglob("*.tscn"))
+        total_nodes = 0
+        per_scene: list[dict[str, Any]] = []
+        for sf in scene_files:
+            try:
+                text = sf.read_text(encoding="utf-8")
+                scene_data = parse_tscn(text)
+                count = len(scene_data.nodes)
+                total_nodes += count
+                per_scene.append({"scene": str(sf.relative_to(project_dir)), "nodes": count})
+            except Exception:
+                per_scene.append({"scene": str(sf.relative_to(project_dir)), "nodes": 0, "error": True})
+
+        data = {
+            "total_nodes": total_nodes,
+            "total_scenes": len(scene_files),
+            "scenes": per_scene,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Total: {data['total_nodes']} nodes across {data['total_scenes']} scenes")
+            for s in data["scenes"]:
+                error = " (parse error)" if s.get("error") else ""
+                click.echo(f"  {s['scene']}: {s['nodes']} nodes{error}")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
 # scene rename-node
 # ---------------------------------------------------------------------------
 

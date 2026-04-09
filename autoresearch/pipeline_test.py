@@ -699,8 +699,34 @@ def run_pipeline(base_dir: Path) -> PipelineRunner:
     p.run("Final project info", "project",
           ["project", "info", pg])
 
-    # ── Phase 25: Full Inspection ───────────────────────────────────
-    p.run("List scenes in project", "scene",
+    # ── Phase 25: Cross-cutting Operations ──────────────────────────
+
+    # Verify the generated main.tscn has expected node count
+    p.run("Verify main scene node count", "scene",
+          ["scene", "list-nodes", ms])
+
+    # Verify shop scene exists and has nodes
+    p.run("Verify shop scene", "scene",
+          ["scene", "list-nodes", str(project_dir / "scenes" / "shop.tscn")])
+
+    # Find all instances in main scene
+    p.run("Find instances in main", "scene",
+          ["scene", "find-nodes", "--scene", ms, "--type", ""])
+
+    # Inspect the main root node (should have theme + script)
+    p.run("Inspect main root", "scene",
+          ["scene", "inspect-node", "--scene", ms, "--node", "Main"])
+
+    # List types across the main scene
+    p.run("List main types", "scene",
+          ["scene", "list-types", ms])
+
+    # List resources in main scene (should have theme, material, script, etc.)
+    p.run("List main resources", "resource",
+          ["resource", "list", "--scene", ms])
+
+    # Final scene listing
+    p.run("List all scenes", "scene",
           ["scene", "list", pd])
 
     p.run("List nodes in main scene", "scene",

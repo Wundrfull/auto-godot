@@ -568,6 +568,59 @@ def add_autoload(
         emit_error(exc, ctx)
 
 
+@project.command("stats")
+@click.argument("path", default=".", type=click.Path())
+@click.pass_context
+def stats(ctx: click.Context, path: str) -> None:
+    """Show project statistics: file counts, total nodes, resource types."""
+    try:
+        project_godot = _find_project_godot(path)
+        project_root = project_godot.parent
+
+        scene_files = list(project_root.rglob("*.tscn"))
+        tres_files = list(project_root.rglob("*.tres"))
+        gd_files = list(project_root.rglob("*.gd"))
+        asset_files = list(project_root.rglob("*.png")) + list(project_root.rglob("*.ogg")) + list(project_root.rglob("*.wav"))
+
+        total_nodes = 0
+        for sf in scene_files:
+            try:
+                from gdauto.formats.tscn import parse_tscn_file
+                scene = parse_tscn_file(sf)
+                total_nodes += len(scene.nodes)
+            except Exception:
+                pass
+
+        config_text = project_godot.read_text(encoding="utf-8")
+        info = _extract_info(config_text)
+
+        data = {
+            "name": info["name"],
+            "godot_version": info.get("godot_version"),
+            "scenes": len(scene_files),
+            "resources": len(tres_files),
+            "scripts": len(gd_files),
+            "assets": len(asset_files),
+            "total_nodes": total_nodes,
+            "autoloads": len(info.get("autoloads", {})),
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Project: {data['name']}")
+            if data.get("godot_version"):
+                click.echo(f"  Godot: {data['godot_version']}")
+            click.echo(f"  Scenes:    {data['scenes']}")
+            click.echo(f"  Scripts:   {data['scripts']}")
+            click.echo(f"  Resources: {data['resources']}")
+            click.echo(f"  Assets:    {data['assets']}")
+            click.echo(f"  Nodes:     {data['total_nodes']}")
+            click.echo(f"  Autoloads: {data['autoloads']}")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
+
+
 def _add_autoload_entry(
     project_godot: Path, name: str, value: str
 ) -> None:

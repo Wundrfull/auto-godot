@@ -1,0 +1,2 @@
+- [Overnight autoresearch preferences](feedback_overnight_autoresearch.md) -- commit per iteration, prioritize Python CLI, avoid PS1 permission blocks
+- [Session 1 results](project_autoresearch_session1_results.md) -- 24 iterations, +266 tests, 9 new command groups, next session plan in .claude/plans/

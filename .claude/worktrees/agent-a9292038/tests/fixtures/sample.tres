@@ -1,0 +1,25 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://cecaux1sm7mo0"]
+
+[ext_resource type="Texture2D" uid="uid://dax5h8example" path="res://sprites/character.png" id="1_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_abc12"]
+atlas = ExtResource("1_sheet")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_def34"]
+atlas = ExtResource("1_sheet")
+region = Rect2(32, 0, 32, 32)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_abc12")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_def34")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
+}]

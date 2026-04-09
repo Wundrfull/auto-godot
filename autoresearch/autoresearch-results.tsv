@@ -21,3 +21,6 @@ iteration	timestamp	metric	best	kept	guard	commit	description
 19	2026-04-09T01:59:38-04:00	1242	1242	keep	pass	64b9958	feat: scene add-camera with zoom/smoothing/limits +7 tests
 20	2026-04-09T02:00:41-04:00	1248	1248	keep	pass	7d00699	feat: scene duplicate-node with property overrides +6 tests
 21	2026-04-09T02:02:30-04:00	1254	1254	keep	pass	7d223ee	feat: project set-rendering command +6 tests
+22	2026-04-09T02:03:59-04:00	1260	1260	keep	pass	a4819ee	feat: script attach command +6 tests
+23	2026-04-09T02:05:09-04:00	1265	1265	keep	pass	ec49fc4	feat: scene list-nodes for quick tree inspection +5 tests
+24	2026-04-09T02:05:56-04:00	1271	1271	keep	pass	5ddb0d0	feat: project stats command +6 tests

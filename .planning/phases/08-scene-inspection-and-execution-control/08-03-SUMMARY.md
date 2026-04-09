@@ -106,6 +106,12 @@ None -- all functions are fully implemented with real protocol commands.
 - Ready for Phase 9 (input injection) which will use pause+step+assert pattern built here
 - Total test count: 1005 passed across full unit suite
 
+## Self-Check: PASSED
+
+- All 5 files exist (2 source, 2 test, 1 summary)
+- All 4 task commits verified (4d76384, a0655d8, aa8ede0, b15869b)
+- Full test suite: 1005 passed, 2 skipped
+
 ---
 *Phase: 08-scene-inspection-and-execution-control*
 *Completed: 2026-04-07*

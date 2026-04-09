@@ -27,6 +27,8 @@ _PROPERTY_RE = re.compile(r"^([\w:/]+)\s*=\s*(.*)$")
 
 # Pattern for constructor attribute values: key=Type("value")
 _ATTR_CONSTRUCTOR_RE = re.compile(r'(\w+)\s*=\s*([A-Za-z_]\w*\("[^"]*"\))')
+# Pattern for array attribute values in headers: key=["val1", "val2"]
+_ATTR_ARRAY_RE = re.compile(r'(\w+)\s*=\s*(\[[^\]]*\])')
 # Pattern for quoted attribute values in headers: key="value"
 _ATTR_QUOTED_RE = re.compile(r'(\w+)\s*=\s*"([^"]*)"')
 # Pattern for unquoted attribute values in headers: key=value
@@ -76,6 +78,11 @@ def parse_section_header(line: str) -> HeaderAttributes | None:
 
     for cm in _ATTR_CONSTRUCTOR_RE.finditer(rest):
         all_attrs.append((cm.start(), cm.group(1), cm.group(2)))
+
+    for am in _ATTR_ARRAY_RE.finditer(rest):
+        key = am.group(1)
+        if not any(k == key for _, k, _ in all_attrs):
+            all_attrs.append((am.start(), key, am.group(2)))
 
     for qm in _ATTR_QUOTED_RE.finditer(rest):
         key = qm.group(1)

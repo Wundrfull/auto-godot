@@ -126,6 +126,13 @@ def _extract_node(section: Section) -> SceneNode:
     attrs = section.header.attrs
     props = {k: v for k, v in section.properties if k != ""}
     unique_id_str = attrs.get("unique_id")
+
+    # Parse groups from header: groups=["group1", "group2"]
+    groups = None
+    groups_str = attrs.get("groups")
+    if groups_str:
+        groups = _parse_groups_attr(groups_str)
+
     return SceneNode(
         name=attrs.get("name", ""),
         type=attrs.get("type"),
@@ -133,9 +140,16 @@ def _extract_node(section: Section) -> SceneNode:
         properties=props,
         instance=attrs.get("instance"),
         owner=attrs.get("owner"),
+        groups=groups,
         unique_id=int(unique_id_str) if unique_id_str else None,
         raw_section=section,
     )
+
+
+def _parse_groups_attr(raw: str) -> list[str]:
+    """Parse groups attribute value like '["g1", "g2"]' into a list."""
+    import re
+    return re.findall(r'"([^"]*)"', raw)
 
 
 def _extract_connection(section: Section) -> Connection:
@@ -254,6 +268,11 @@ def _build_tscn_from_model(scene: GdScene) -> str:
             parts.append(f'type="{node.type}"')
         if node.parent:
             parts.append(f'parent="{node.parent}"')
+        if node.instance:
+            parts.append(f"instance={node.instance}")
+        if node.groups:
+            groups_str = ", ".join(f'"{g}"' for g in node.groups)
+            parts.append(f"groups=[{groups_str}]")
         if node.unique_id is not None:
             parts.append(f"unique_id={node.unique_id}")
         lines.append("[node " + " ".join(parts) + "]")

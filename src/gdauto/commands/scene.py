@@ -760,3 +760,91 @@ def add_instance(
         emit(data, _human, ctx)
     except ProjectError as exc:
         emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
+# scene add-group
+# ---------------------------------------------------------------------------
+
+
+@scene.command("add-group")
+@click.option(
+    "--scene", "scene_path", required=True,
+    type=click.Path(exists=True),
+    help="Path to the .tscn scene file",
+)
+@click.option(
+    "--node", "node_name", required=True,
+    help="Name of the node to add to a group",
+)
+@click.option(
+    "--group", "groups", multiple=True, required=True,
+    help="Group name(s) to add (e.g., 'enemies', 'destructible')",
+)
+@click.option(
+    "--parent", "parent_path", default=None,
+    help="Parent node path to disambiguate",
+)
+@click.pass_context
+def add_group(
+    ctx: click.Context,
+    scene_path: str,
+    node_name: str,
+    groups: tuple[str, ...],
+    parent_path: str | None,
+) -> None:
+    """Add a node to one or more groups in a scene file.
+
+    Examples:
+
+      gdauto scene add-group --scene scenes/enemy.tscn --node Enemy --group enemies --group damageable
+
+      gdauto scene add-group --scene scenes/coin.tscn --node Coin --group collectibles
+    """
+    try:
+        path = Path(scene_path)
+        text = path.read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+
+        target = None
+        for node in scene_data.nodes:
+            if node.name == node_name:
+                if parent_path is None or node.parent == parent_path:
+                    target = node
+                    break
+
+        if target is None:
+            raise ProjectError(
+                message=f"Node '{node_name}' not found",
+                code="NODE_NOT_FOUND",
+                fix="Check the node name and parent path",
+            )
+
+        if target.groups is None:
+            target.groups = []
+
+        added: list[str] = []
+        for group in groups:
+            if group not in target.groups:
+                target.groups.append(group)
+                added.append(group)
+
+        scene_data._raw_header = None
+        scene_data._raw_sections = None
+        output = serialize_tscn(scene_data)
+        path.write_text(output, encoding="utf-8")
+
+        data = {
+            "updated": True,
+            "node": node_name,
+            "groups_added": added,
+            "total_groups": target.groups,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            groups_str = ", ".join(data["groups_added"])
+            click.echo(f"Added '{data['node']}' to groups: {groups_str}")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)

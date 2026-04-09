@@ -957,3 +957,103 @@ def add_camera(
         emit(data, _human, ctx)
     except ProjectError as exc:
         emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
+# scene duplicate-node
+# ---------------------------------------------------------------------------
+
+
+@scene.command("duplicate-node")
+@click.option("--scene", "scene_path", required=True, type=click.Path(exists=True), help="Scene file")
+@click.option("--node", "node_name", required=True, help="Name of the node to duplicate")
+@click.option("--new-name", required=True, help="Name for the duplicated node")
+@click.option("--parent", "parent_path", default=None, help="Parent path to disambiguate source")
+@click.option("--property", "properties", multiple=True, help="Override properties on the copy as 'key=value'")
+@click.pass_context
+def duplicate_node(
+    ctx: click.Context,
+    scene_path: str,
+    node_name: str,
+    new_name: str,
+    parent_path: str | None,
+    properties: tuple[str, ...],
+) -> None:
+    """Duplicate an existing node in a scene with a new name.
+
+    Examples:
+
+      gdauto scene duplicate-node --scene scenes/level.tscn --node Enemy --new-name Enemy2 --property "position=Vector2(200, 50)"
+
+      gdauto scene duplicate-node --scene scenes/main.tscn --node Coin --new-name Coin2
+    """
+    try:
+        path_obj = Path(scene_path)
+        text = path_obj.read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+
+        # Find source node
+        source = None
+        for node in scene_data.nodes:
+            if node.name == node_name:
+                if parent_path is None or node.parent == parent_path:
+                    source = node
+                    break
+
+        if source is None:
+            raise ProjectError(
+                message=f"Node '{node_name}' not found",
+                code="NODE_NOT_FOUND",
+                fix="Check the node name",
+            )
+
+        # Check new name doesn't exist at same parent
+        for node in scene_data.nodes:
+            if node.name == new_name and node.parent == source.parent:
+                raise ProjectError(
+                    message=f"Node '{new_name}' already exists at same parent",
+                    code="NODE_EXISTS",
+                    fix="Choose a different name",
+                )
+
+        # Clone properties
+        new_props = dict(source.properties)
+
+        # Apply overrides
+        for prop in properties:
+            if "=" not in prop:
+                raise ProjectError(
+                    message=f"Invalid property format: '{prop}'",
+                    code="INVALID_PROPERTY",
+                    fix="Use 'key=value' format",
+                )
+            key, value_str = prop.split("=", 1)
+            new_props[key.strip()] = parse_value(value_str.strip())
+
+        scene_data.nodes.append(SceneNode(
+            name=new_name,
+            type=source.type,
+            parent=source.parent,
+            properties=new_props,
+            instance=source.instance,
+            groups=list(source.groups) if source.groups else None,
+        ))
+
+        scene_data._raw_header = None
+        scene_data._raw_sections = None
+        output = serialize_tscn(scene_data)
+        path_obj.write_text(output, encoding="utf-8")
+
+        data = {
+            "duplicated": True,
+            "source": node_name,
+            "new_name": new_name,
+            "overrides": len(properties),
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Duplicated '{data['source']}' as '{data['new_name']}'")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)

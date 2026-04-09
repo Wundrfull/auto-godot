@@ -15,6 +15,7 @@ import rich_click as click
 
 from gdauto import __version__
 from gdauto.backend import GodotBackend
+from gdauto.commands.audio import audio
 from gdauto.commands.debug import debug
 from gdauto.commands.export import export
 from gdauto.commands.project import project
@@ -112,6 +113,7 @@ def _print_import_result(data: dict[str, Any], verbose: bool = False) -> None:
 
 
 # Register command groups
+cli.add_command(audio)
 cli.add_command(debug)
 cli.add_command(project)
 cli.add_command(resource)

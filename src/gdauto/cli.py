@@ -25,6 +25,7 @@ from gdauto.commands.scene import scene
 from gdauto.commands.script import script
 from gdauto.commands.skill import skill
 from gdauto.commands.sprite import sprite
+from gdauto.commands.theme import theme
 from gdauto.commands.tileset import tileset
 from gdauto.errors import GdautoError, GodotBinaryError
 from gdauto.export.pipeline import import_with_retry
@@ -124,5 +125,6 @@ cli.add_command(sprite)
 cli.add_command(tileset)
 cli.add_command(scene)
 cli.add_command(script)
+cli.add_command(theme)
 cli.add_command(import_cmd, name="import")
 cli.add_command(skill)

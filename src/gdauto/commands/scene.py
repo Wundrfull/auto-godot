@@ -848,3 +848,112 @@ def add_group(
         emit(data, _human, ctx)
     except ProjectError as exc:
         emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
+# scene add-camera
+# ---------------------------------------------------------------------------
+
+
+@scene.command("add-camera")
+@click.option("--scene", "scene_path", required=True, type=click.Path(exists=True), help="Scene file")
+@click.option("--name", "node_name", default="Camera2D", help="Camera node name")
+@click.option("--zoom", default=1.0, type=float, help="Zoom level (1.0 = default, 2.0 = 2x)")
+@click.option("--smoothing/--no-smoothing", default=True, help="Position smoothing (default: on)")
+@click.option("--smoothing-speed", default=5.0, type=float, help="Smoothing speed (default: 5.0)")
+@click.option("--limit-left", type=int, default=None, help="Left camera limit in pixels")
+@click.option("--limit-top", type=int, default=None, help="Top camera limit in pixels")
+@click.option("--limit-right", type=int, default=None, help="Right camera limit in pixels")
+@click.option("--limit-bottom", type=int, default=None, help="Bottom camera limit in pixels")
+@click.option("--current/--no-current", default=True, help="Set as current camera (default: yes)")
+@click.option("--parent", "parent_path", default=None, help="Parent node path")
+@click.pass_context
+def add_camera(
+    ctx: click.Context,
+    scene_path: str,
+    node_name: str,
+    zoom: float,
+    smoothing: bool,
+    smoothing_speed: float,
+    limit_left: int | None,
+    limit_top: int | None,
+    limit_right: int | None,
+    limit_bottom: int | None,
+    current: bool,
+    parent_path: str | None,
+) -> None:
+    """Add a Camera2D node with common settings to a scene.
+
+    Examples:
+
+      gdauto scene add-camera --scene scenes/level.tscn --zoom 2 --smoothing --parent Player
+
+      gdauto scene add-camera --scene scenes/main.tscn --limit-left 0 --limit-top 0 --limit-right 1920 --limit-bottom 1080
+    """
+    try:
+        from gdauto.formats.values import Vector2 as Vec2
+
+        path_obj = Path(scene_path)
+        text = path_obj.read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+        parent = parent_path or "."
+
+        for node in scene_data.nodes:
+            if node.name == node_name and node.parent == parent:
+                raise ProjectError(
+                    message=f"Node '{node_name}' already exists",
+                    code="NODE_EXISTS",
+                    fix="Choose a different name",
+                )
+
+        props: dict[str, Any] = {}
+        if current:
+            props["enabled"] = True
+        if zoom != 1.0:
+            props["zoom"] = Vec2(zoom, zoom)
+        if smoothing:
+            props["position_smoothing_enabled"] = True
+            props["position_smoothing_speed"] = smoothing_speed
+        if limit_left is not None:
+            props["limit_left"] = limit_left
+        if limit_top is not None:
+            props["limit_top"] = limit_top
+        if limit_right is not None:
+            props["limit_right"] = limit_right
+        if limit_bottom is not None:
+            props["limit_bottom"] = limit_bottom
+
+        scene_data.nodes.append(SceneNode(
+            name=node_name,
+            type="Camera2D",
+            parent=parent,
+            properties=props,
+        ))
+
+        scene_data._raw_header = None
+        scene_data._raw_sections = None
+        output = serialize_tscn(scene_data)
+        path_obj.write_text(output, encoding="utf-8")
+
+        data = {
+            "added": True,
+            "name": node_name,
+            "zoom": zoom,
+            "smoothing": smoothing,
+            "current": current,
+            "has_limits": any(v is not None for v in [limit_left, limit_top, limit_right, limit_bottom]),
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            parts = [f"Camera2D '{data['name']}'"]
+            if data["zoom"] != 1.0:
+                parts.append(f"zoom={data['zoom']}x")
+            if data["smoothing"]:
+                parts.append("smoothing")
+            if data["has_limits"]:
+                parts.append("with limits")
+            click.echo("Added " + ", ".join(parts))
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)

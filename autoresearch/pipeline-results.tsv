@@ -4,3 +4,4 @@ iteration	timestamp	metric	best	kept	guard	commit	description
 2	2026-04-09T11:26:00-04:00	79	79	keep	pass	75a58b4	+14: scene create-simple, inspect-node, move-node, list-types, copy-properties, set-anchor, from-template; script add-method/var/export/signal; project add-plugin
 3	2026-04-09T11:30:00-04:00	85	85	keep	pass	f5d49d1	+6: script list-methods, list-vars; scene count-nodes; pipeline expanded to 85 steps
 4	2026-04-09T11:33:00-04:00	96	96	keep	pass	51f1aef	+11: expanded pipeline with shop scene, player scene, cross-scene composition. 96 total steps
+5	2026-04-09T11:38:00-04:00	98	98	keep	pass	6518653	+2: scene find-nodes command + 76 new tests. Pipeline: 98 steps, 1347 tests

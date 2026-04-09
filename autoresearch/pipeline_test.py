@@ -633,7 +633,73 @@ def run_pipeline(base_dir: Path) -> PipelineRunner:
     p.run("Find nodes with property", "scene",
           ["scene", "find-nodes", "--scene", ms, "--property", "text"])
 
-    # ── Phase 22: Full Inspection ───────────────────────────────────
+    # ── Phase 22: Save System Setup ────────────────────────────────
+    p.run("Create save manager script", "script",
+          ["script", "create", "--extends", "Node",
+           "--class-name", "SaveManager",
+           "--signal", "game_saved",
+           "--signal", "game_loaded",
+           "--ready",
+           str(autoload_dir / "save_manager.gd")])
+
+    p.run("Add save path var", "script",
+          ["script", "add-var", "--file", str(autoload_dir / "save_manager.gd"),
+           "--name", "SAVE_PATH", "--type", "String",
+           "--value", '"user://save.json"'])
+
+    p.run("Add save method", "script",
+          ["script", "add-method", "--file", str(autoload_dir / "save_manager.gd"),
+           "--name", "save_game",
+           "--params", "data: Dictionary",
+           "--body", 'var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)\n\tfile.store_string(JSON.stringify(data))\n\tgame_saved.emit()'])
+
+    p.run("Add load method", "script",
+          ["script", "add-method", "--file", str(autoload_dir / "save_manager.gd"),
+           "--name", "load_game",
+           "--return-type", "Dictionary",
+           "--body", 'if not FileAccess.file_exists(SAVE_PATH):\n\t\treturn {}\n\tvar file := FileAccess.open(SAVE_PATH, FileAccess.READ)\n\tvar json := JSON.new()\n\tjson.parse(file.get_as_text())\n\tgame_loaded.emit()\n\treturn json.data'])
+
+    p.run("Register save manager autoload", "project",
+          ["project", "add-autoload",
+           "--name", "SaveManager",
+           "--path", "res://scripts/autoload/save_manager.gd", pg])
+
+    # List the save manager methods to verify
+    p.run("Verify save manager methods", "script",
+          ["script", "list-methods", str(autoload_dir / "save_manager.gd")])
+
+    # ── Phase 23: Game State with Autoloads ─────────────────────────
+    p.run("Add score var to game manager", "script",
+          ["script", "add-var", "--file", str(autoload_dir / "game_manager.gd"),
+           "--name", "score", "--type", "int", "--value", "0"])
+
+    p.run("Add coins_per_sec var", "script",
+          ["script", "add-var", "--file", str(autoload_dir / "game_manager.gd"),
+           "--name", "coins_per_sec", "--type", "float", "--value", "0.0"])
+
+    p.run("Add click method to game manager", "script",
+          ["script", "add-method", "--file", str(autoload_dir / "game_manager.gd"),
+           "--name", "add_click",
+           "--params", "value: int",
+           "--body", "score += value"])
+
+    p.run("Add passive income method", "script",
+          ["script", "add-method", "--file", str(autoload_dir / "game_manager.gd"),
+           "--name", "tick_passive",
+           "--params", "delta: float",
+           "--body", "score += int(coins_per_sec * delta)"])
+
+    # ── Phase 24: Scene Dependency Validation ────────────────────────
+    p.run("Final project validation", "project",
+          ["project", "validate", pd])
+
+    p.run("Final project stats", "project",
+          ["project", "stats", pd])
+
+    p.run("Final project info", "project",
+          ["project", "info", pg])
+
+    # ── Phase 25: Full Inspection ───────────────────────────────────
     p.run("List scenes in project", "scene",
           ["scene", "list", pd])
 

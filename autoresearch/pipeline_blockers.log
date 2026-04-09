@@ -1,22 +1,22 @@
-# Pipeline Blockers Log - 2026-04-09T15:33:28Z
-# Score: 96/96
+# Pipeline Blockers Log - 2026-04-09T15:36:18Z
+# Score: 111/111
 
 ## Summary by Category
   animation: 2/2 [PASS]
   audio: 3/3 [PASS]
   particle: 1/1 [PASS]
   preset: 2/2 [PASS]
-  project: 15/15 [PASS]
+  project: 19/19 [PASS]
   resource: 4/4 [PASS]
-  scene: 46/46 [PASS]
-  script: 16/16 [PASS]
+  scene: 48/48 [PASS]
+  script: 25/25 [PASS]
   shader: 2/2 [PASS]
   signal: 3/3 [PASS]
   theme: 2/2 [PASS]
 
 ## No blockers! All steps passed.
 
-## Passed (96 steps)
+## Passed (111 steps)
   OK: Create project [project]
   OK: Set display 720x1280 portrait [project]
   OK: Set rendering to mobile [project]
@@ -105,6 +105,21 @@
   OK: Instance shop into main [scene]
   OK: Create player scene [scene]
   OK: Create player script [script]
+  OK: Find nodes by type [scene]
+  OK: Find nodes with property [scene]
+  OK: Create save manager script [script]
+  OK: Add save path var [script]
+  OK: Add save method [script]
+  OK: Add load method [script]
+  OK: Register save manager autoload [project]
+  OK: Verify save manager methods [script]
+  OK: Add score var to game manager [script]
+  OK: Add coins_per_sec var [script]
+  OK: Add click method to game manager [script]
+  OK: Add passive income method [script]
+  OK: Final project validation [project]
+  OK: Final project stats [project]
+  OK: Final project info [project]
   OK: List scenes in project [scene]
   OK: List nodes in main scene [scene]
   OK: Inspect main scene [resource]

@@ -538,6 +538,106 @@ def set_property(
 
 
 # ---------------------------------------------------------------------------
+# scene add-timer
+# ---------------------------------------------------------------------------
+
+
+@scene.command("add-timer")
+@click.option(
+    "--scene", "scene_path", required=True,
+    type=click.Path(exists=True),
+    help="Path to the .tscn scene file",
+)
+@click.option("--name", "node_name", required=True, help="Timer node name")
+@click.option("--wait", "wait_time", required=True, type=float, help="Wait time in seconds")
+@click.option("--one-shot/--repeating", default=False, help="One-shot or repeating (default: repeating)")
+@click.option("--autostart/--no-autostart", default=False, help="Start automatically")
+@click.option("--parent", "parent_path", default=None, help="Parent node path")
+@click.option("--connect", "connect_method", default=None, help="Auto-connect timeout signal to this method on parent")
+@click.pass_context
+def add_timer(
+    ctx: click.Context,
+    scene_path: str,
+    node_name: str,
+    wait_time: float,
+    one_shot: bool,
+    autostart: bool,
+    parent_path: str | None,
+    connect_method: str | None,
+) -> None:
+    """Add a Timer node with common settings to a scene.
+
+    Examples:
+
+      gdauto scene add-timer --scene scenes/main.tscn --name SpawnTimer --wait 2.0 --repeating --autostart --connect _on_spawn_timer_timeout
+
+      gdauto scene add-timer --scene scenes/player.tscn --name CooldownTimer --wait 0.5 --one-shot --parent Player
+    """
+    try:
+        from gdauto.formats.tscn import Connection
+
+        path_obj = Path(scene_path)
+        text = path_obj.read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+
+        parent = parent_path or "."
+
+        for node in scene_data.nodes:
+            if node.name == node_name and node.parent == parent:
+                raise ProjectError(
+                    message=f"Node '{node_name}' already exists",
+                    code="NODE_EXISTS",
+                    fix="Choose a different name",
+                )
+
+        props: dict[str, Any] = {"wait_time": wait_time}
+        if one_shot:
+            props["one_shot"] = True
+        if autostart:
+            props["autostart"] = True
+
+        scene_data.nodes.append(SceneNode(
+            name=node_name,
+            type="Timer",
+            parent=parent,
+            properties=props,
+        ))
+
+        if connect_method:
+            to_node = "." if parent == "." else parent
+            scene_data.connections.append(Connection(
+                signal="timeout",
+                from_node=node_name,
+                to_node=to_node,
+                method=connect_method,
+            ))
+
+        scene_data._raw_header = None
+        scene_data._raw_sections = None
+        output = serialize_tscn(scene_data)
+        path_obj.write_text(output, encoding="utf-8")
+
+        data = {
+            "added": True,
+            "name": node_name,
+            "wait_time": wait_time,
+            "one_shot": one_shot,
+            "autostart": autostart,
+            "connected": connect_method,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            mode = "one-shot" if data["one_shot"] else "repeating"
+            auto = ", autostart" if data["autostart"] else ""
+            conn = f", connected to {data['connected']}" if data["connected"] else ""
+            click.echo(f"Added Timer '{data['name']}' ({data['wait_time']}s, {mode}{auto}{conn})")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
 # scene add-instance
 # ---------------------------------------------------------------------------
 

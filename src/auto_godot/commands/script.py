@@ -807,3 +807,94 @@ def list_vars(ctx: click.Context, file_path: str) -> None:
             ),
             ctx,
         )
+
+
+# ---------------------------------------------------------------------------
+# script docs
+# ---------------------------------------------------------------------------
+
+
+@script.command("docs")
+@click.argument("path", type=click.Path(exists=True))
+@click.option(
+    "-o", "--output",
+    "output_dir",
+    type=click.Path(),
+    default=None,
+    help="Output directory for generated Markdown docs.",
+)
+@click.pass_context
+def docs(ctx: click.Context, path: str, output_dir: str | None) -> None:
+    """Generate documentation from GDScript files.
+
+    Parses ## doc comments, signals, exports, functions, enums, and
+    constants from .gd files. Accepts a single file or a project
+    directory (recursively finds all .gd files).
+
+    Examples:
+
+      auto-godot script docs scripts/player.gd
+
+      auto-godot script docs /path/to/project -o docs/
+
+      auto-godot --json script docs scripts/player.gd
+    """
+    from auto_godot.gdscript_docs import format_markdown, parse_gdscript
+
+    try:
+        target = Path(path)
+        gd_files: list[Path] = []
+
+        if target.is_file():
+            if not target.suffix == ".gd":
+                raise ProjectError(
+                    message=f"Not a GDScript file: {path}",
+                    code="NOT_GDSCRIPT",
+                    fix="Provide a .gd file or a directory containing .gd files",
+                )
+            gd_files.append(target)
+        else:
+            gd_files = sorted(target.rglob("*.gd"))
+            if not gd_files:
+                raise ProjectError(
+                    message=f"No .gd files found in {path}",
+                    code="NO_SCRIPTS_FOUND",
+                    fix="Check the directory path contains GDScript files",
+                )
+
+        results: list[dict[str, Any]] = []
+        for gd_file in gd_files:
+            text = gd_file.read_text(encoding="utf-8")
+            script_doc = parse_gdscript(text, str(gd_file))
+            results.append(script_doc.to_dict())
+
+            if output_dir is not None:
+                out_path = Path(output_dir)
+                out_path.mkdir(parents=True, exist_ok=True)
+                md_name = gd_file.stem + ".md"
+                md_path = out_path / md_name
+                md_path.write_text(format_markdown(script_doc), encoding="utf-8")
+
+        data: dict[str, Any] = {
+            "scripts": results,
+            "count": len(results),
+        }
+        if output_dir is not None:
+            data["output_dir"] = output_dir
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            if data.get("output_dir"):
+                click.echo(
+                    f"Generated docs for {data['count']} script(s) "
+                    f"in {data['output_dir']}/"
+                )
+                return
+            # Single-file mode without -o: print markdown to stdout
+            for script_data in data["scripts"]:
+                gd_text = Path(script_data["path"]).read_text(encoding="utf-8")
+                sd = parse_gdscript(gd_text, script_data["path"])
+                click.echo(format_markdown(sd))
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)

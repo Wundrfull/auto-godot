@@ -36,6 +36,20 @@ class TestParticleAdd:
         assert "CPUParticles2D" in text
         assert 'name="Explosion"' in text
 
+    def test_preset_includes_texture(self, tmp_path: Path) -> None:
+        scene = _make_scene(tmp_path)
+        CliRunner().invoke(cli, [
+            "particle", "add",
+            "--scene", str(scene),
+            "--name", "Sparks",
+            "--preset", "sparkle",
+        ])
+        text = scene.read_text()
+        assert 'texture = SubResource("Sparks_tex")' in text
+        assert '[sub_resource type="GradientTexture2D"' in text
+        assert '[sub_resource type="Gradient"' in text
+        assert "PackedColorArray" in text
+
     def test_add_sparkle(self, tmp_path: Path) -> None:
         scene = _make_scene(tmp_path)
         runner = CliRunner()

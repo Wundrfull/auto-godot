@@ -122,7 +122,9 @@ class TestPresetValidate:
         result = CliRunner().invoke(
             cli, ["-j", "preset", "validate", str(tmp_path)]
         )
+        assert result.exit_code == 0  # warnings are informational, not errors
         data = json.loads(result.output)
+        assert data["valid"] is False
         issues = [w["issue"] for w in data["warnings"]]
         assert "duplicate_name" in issues
 
@@ -132,7 +134,9 @@ class TestPresetValidate:
         result = CliRunner().invoke(
             cli, ["-j", "preset", "validate", str(tmp_path)]
         )
+        assert result.exit_code == 0
         data = json.loads(result.output)
+        assert data["valid"] is False
         issues = [w["issue"] for w in data["warnings"]]
         assert "missing_export_path" in issues
 
@@ -142,7 +146,9 @@ class TestPresetValidate:
         result = CliRunner().invoke(
             cli, ["-j", "preset", "validate", str(tmp_path)]
         )
+        assert result.exit_code == 0
         data = json.loads(result.output)
+        assert data["valid"] is False
         issues = [w["issue"] for w in data["warnings"]]
         assert "unknown_platform" in issues
 
@@ -151,7 +157,9 @@ class TestPresetValidate:
         result = CliRunner().invoke(
             cli, ["-j", "preset", "validate", str(tmp_path)]
         )
+        assert result.exit_code == 0
         data = json.loads(result.output)
+        assert data["valid"] is False
         issues = [w["issue"] for w in data["warnings"]]
         assert "missing_export_dir" in issues
 

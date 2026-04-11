@@ -272,6 +272,49 @@ def list_platforms(ctx: click.Context) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _load_presets_file(project_path: str) -> tuple[Path, list[dict[str, Any]]]:
+    """Resolve project dir, read export_presets.cfg, return (dir, presets)."""
+    project_dir = Path(project_path)
+    if project_dir.is_file():
+        project_dir = project_dir.parent
+    preset_file = project_dir / "export_presets.cfg"
+    if not preset_file.exists():
+        raise ProjectError(
+            message="No export_presets.cfg found",
+            code="NO_PRESETS",
+            fix="Create presets with: auto-godot preset create --platform windows",
+        )
+    presets = _parse_presets_full(preset_file.read_text(encoding="utf-8"))
+    return project_dir, presets
+
+
+def _find_preset(presets: list[dict[str, Any]], name: str) -> dict[str, Any]:
+    """Find a preset by name, raising ProjectError if not found."""
+    match = next((p for p in presets if p.get("name") == name), None)
+    if match is None:
+        names = [p.get("name", "(unnamed)") for p in presets]
+        raise ProjectError(
+            message=f"Preset '{name}' not found",
+            code="PRESET_NOT_FOUND",
+            fix=f"Available presets: {', '.join(names)}",
+        )
+    return match
+
+
+def _display_inspect(data: dict[str, Any], verbose: bool = False) -> None:
+    """Human-readable output for preset inspect."""
+    click.echo(f"Preset: {data.get('name', '(unnamed)')}")
+    for key, val in data.items():
+        if key == "options":
+            continue
+        click.echo(f"  {key}: {val}")
+    opts = data.get("options", {})
+    if opts:
+        click.echo(f"  options ({len(opts)}):")
+        for k, v in opts.items():
+            click.echo(f"    {k} = {v}")
+
+
 @preset.command("inspect")
 @click.argument("preset_name")
 @click.option(
@@ -291,42 +334,9 @@ def inspect(ctx: click.Context, preset_name: str, project_path: str) -> None:
       auto-godot --json preset inspect "Linux" --project /path/to/project
     """
     try:
-        project_dir = Path(project_path)
-        if project_dir.is_file():
-            project_dir = project_dir.parent
-
-        preset_file = project_dir / "export_presets.cfg"
-        if not preset_file.exists():
-            raise ProjectError(
-                message="No export_presets.cfg found",
-                code="NO_PRESETS",
-                fix="Create presets with: auto-godot preset create --platform windows",
-            )
-
-        presets = _parse_presets_full(preset_file.read_text(encoding="utf-8"))
-        match = next((p for p in presets if p.get("name") == preset_name), None)
-
-        if match is None:
-            names = [p.get("name", "(unnamed)") for p in presets]
-            raise ProjectError(
-                message=f"Preset '{preset_name}' not found",
-                code="PRESET_NOT_FOUND",
-                fix=f"Available presets: {', '.join(names)}",
-            )
-
-        def _human(data: dict[str, Any], verbose: bool = False) -> None:
-            click.echo(f"Preset: {data.get('name', '(unnamed)')}")
-            for key, val in data.items():
-                if key == "options":
-                    continue
-                click.echo(f"  {key}: {val}")
-            opts = data.get("options", {})
-            if opts:
-                click.echo(f"  options ({len(opts)}):")
-                for k, v in opts.items():
-                    click.echo(f"    {k} = {v}")
-
-        emit(match, _human, ctx)
+        _, presets = _load_presets_file(project_path)
+        match = _find_preset(presets, preset_name)
+        emit(match, _display_inspect, ctx)
     except ProjectError as exc:
         emit_error(exc, ctx)
 
@@ -334,6 +344,58 @@ def inspect(ctx: click.Context, preset_name: str, project_path: str) -> None:
 # ---------------------------------------------------------------------------
 # preset validate
 # ---------------------------------------------------------------------------
+
+
+def _check_duplicate_names(presets: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Check for duplicate preset names."""
+    warnings: list[dict[str, str]] = []
+    seen: list[str] = []
+    for p in presets:
+        name = p.get("name", "")
+        if name in seen:
+            warnings.append({
+                "preset": name, "issue": "duplicate_name",
+                "message": f"Duplicate preset name: '{name}'",
+            })
+        seen.append(name)
+    return warnings
+
+
+def _check_preset_fields(
+    p: dict[str, Any], project_dir: Path, known_platforms: set[str],
+) -> list[dict[str, str]]:
+    """Validate a single preset's fields."""
+    warnings: list[dict[str, str]] = []
+    name = p.get("name", f"preset.{p.get('index', '?')}")
+    if not p.get("export_path"):
+        warnings.append({
+            "preset": name, "issue": "missing_export_path",
+            "message": "No export_path configured",
+        })
+    platform = p.get("platform", "")
+    if platform and platform not in known_platforms:
+        warnings.append({
+            "preset": name, "issue": "unknown_platform",
+            "message": f"Unrecognized platform: '{platform}'",
+        })
+    export_path = p.get("export_path", "")
+    if export_path and not (project_dir / export_path).parent.exists():
+        warnings.append({
+            "preset": name, "issue": "missing_export_dir",
+            "message": f"Export directory does not exist: {(project_dir / export_path).parent}",
+        })
+    return warnings
+
+
+def _display_validate(data: dict[str, Any], verbose: bool = False) -> None:
+    """Human-readable output for preset validate."""
+    count = data["preset_count"]
+    if data["valid"]:
+        click.echo(f"All {count} preset(s) valid.")
+        return
+    click.echo(f"Found {data['warning_count']} issue(s) in {count} preset(s):")
+    for w in data["warnings"]:
+        click.echo(f"  [{w['preset']}] {w['message']}")
 
 
 @preset.command("validate")
@@ -352,81 +414,17 @@ def validate(ctx: click.Context, project_path: str) -> None:
       auto-godot --json preset validate /path/to/project
     """
     try:
-        project_dir = Path(project_path)
-        if project_dir.is_file():
-            project_dir = project_dir.parent
-
-        preset_file = project_dir / "export_presets.cfg"
-        if not preset_file.exists():
-            raise ProjectError(
-                message="No export_presets.cfg found",
-                code="NO_PRESETS",
-                fix="Create presets with: auto-godot preset create --platform windows",
-            )
-
-        presets = _parse_presets_full(preset_file.read_text(encoding="utf-8"))
-        warnings: list[dict[str, str]] = []
+        project_dir, presets = _load_presets_file(project_path)
         known_platforms = {info["platform"] for info in _PLATFORMS.values()}
-
-        # Check for duplicate names
-        names: list[str] = []
+        warnings = _check_duplicate_names(presets)
         for p in presets:
-            name = p.get("name", "")
-            if name in names:
-                warnings.append({
-                    "preset": name,
-                    "issue": "duplicate_name",
-                    "message": f"Duplicate preset name: '{name}'",
-                })
-            names.append(name)
-
-        for p in presets:
-            name = p.get("name", f"preset.{p.get('index', '?')}")
-
-            # Missing export path
-            if not p.get("export_path"):
-                warnings.append({
-                    "preset": name,
-                    "issue": "missing_export_path",
-                    "message": "No export_path configured",
-                })
-
-            # Check platform
-            platform = p.get("platform", "")
-            if platform and platform not in known_platforms:
-                warnings.append({
-                    "preset": name,
-                    "issue": "unknown_platform",
-                    "message": f"Unrecognized platform: '{platform}'",
-                })
-
-            # Check export directory exists
-            export_path = p.get("export_path", "")
-            if export_path:
-                full = project_dir / export_path
-                if not full.parent.exists():
-                    warnings.append({
-                        "preset": name,
-                        "issue": "missing_export_dir",
-                        "message": f"Export directory does not exist: {full.parent}",
-                    })
-
+            warnings.extend(_check_preset_fields(p, project_dir, known_platforms))
         data = {
             "valid": len(warnings) == 0,
             "preset_count": len(presets),
             "warning_count": len(warnings),
             "warnings": warnings,
         }
-
-        def _human(data: dict[str, Any], verbose: bool = False) -> None:
-            count = data["preset_count"]
-            if data["valid"]:
-                click.echo(f"All {count} preset(s) valid.")
-                return
-            click.echo(f"Found {data['warning_count']} issue(s) in {count} preset(s):")
-            for w in data["warnings"]:
-                click.echo(f"  [{w['preset']}] {w['message']}")
-
-        emit(data, _human, ctx)
+        emit(data, _display_validate, ctx)
     except ProjectError as exc:
         emit_error(exc, ctx)

@@ -88,8 +88,29 @@ def cli(
         godot_path=godot_path,
     )
 
+    if dry_run:
+        ctx.call_on_close(lambda: _warn_if_dry_run_unacknowledged(ctx))
+
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
+
+
+def _warn_if_dry_run_unacknowledged(ctx: click.Context) -> None:
+    """Warn users when --dry-run was set but no maybe_write() was called.
+
+    Closes the data-safety trap where commands outside scene group silently
+    write files despite the flag. Supported commands call maybe_write()
+    which sets dry_run_acknowledged=True. If the flag remains False after
+    the command runs, no write was intercepted and the user may have
+    unintentionally modified files.
+    """
+    config: GlobalConfig = ctx.obj
+    if config.dry_run and not config.dry_run_acknowledged:
+        sys.stderr.write(
+            "Warning: --dry-run is not yet implemented for this command.\n"
+            "Files may have been written. See issue #110 for supported "
+            "commands.\n"
+        )
 
 
 @click.command("import")

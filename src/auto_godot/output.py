@@ -32,6 +32,7 @@ class GlobalConfig:
     verbose: bool = field(default=False)
     quiet: bool = field(default=False)
     dry_run: bool = field(default=False)
+    dry_run_acknowledged: bool = field(default=False)
     godot_path: str | None = field(default=None)
 
 
@@ -74,6 +75,7 @@ def maybe_write(
                 f"[dry-run] Would {action}: {file_path} "
                 f"({len(content)} bytes)\n"
             )
+        config.dry_run_acknowledged = True
         return False
     file_path.write_text(content, encoding="utf-8")
     return True

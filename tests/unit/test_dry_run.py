@@ -142,3 +142,37 @@ class TestDryRunWithoutFlag:
         assert result.exit_code == 0
         assert out.exists()
         assert "Node2D" in out.read_text()
+
+
+class TestDryRunSafetyGuard:
+    """Unsupported commands must warn users that --dry-run had no effect."""
+
+    def test_unsupported_command_emits_warning(self, tmp_path: Path) -> None:
+        """script create does not yet honor --dry-run, so warning must fire."""
+        out = tmp_path / "test.gd"
+        result = CliRunner().invoke(cli, [
+            "--dry-run", "script", "create",
+            "--extends", "Node", str(out),
+        ])
+        # Warning fired because script create still writes directly.
+        assert "--dry-run is not yet implemented" in result.output
+        assert "Files may have been written" in result.output
+
+    def test_supported_command_no_warning(self, tmp_path: Path) -> None:
+        """scene create-simple honors --dry-run, so no warning."""
+        out = tmp_path / "level.tscn"
+        result = CliRunner().invoke(cli, [
+            "--dry-run", "scene", "create-simple",
+            "--root-type", "Node2D", "--root-name", "Level",
+            "-o", str(out),
+        ])
+        assert result.exit_code == 0
+        assert "--dry-run is not yet implemented" not in result.output
+
+    def test_no_warning_without_dry_run(self, tmp_path: Path) -> None:
+        """Warning must not fire when --dry-run was not passed."""
+        out = tmp_path / "test.gd"
+        result = CliRunner().invoke(cli, [
+            "script", "create", "--extends", "Node", str(out),
+        ])
+        assert "--dry-run is not yet implemented" not in result.output

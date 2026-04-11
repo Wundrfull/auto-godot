@@ -2,25 +2,19 @@
 
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
 from typing import Any
 
 import rich_click as click
 from rich.console import Console
-from rich.table import Table
 
 from auto_godot.backend import GodotBackend
 from auto_godot.errors import GodotBinaryError, ProjectError
 from auto_godot.formats.project_cfg import (
     _bracket_depth,
     parse_project_config,
-    serialize_project_config,
 )
-
-from auto_godot.formats.tscn import parse_tscn_file
-from auto_godot.formats.tres import parse_tres_file
 from auto_godot.output import GlobalConfig, emit, emit_error
 
 
@@ -146,7 +140,7 @@ def _display_project_info_human(data: dict[str, Any], verbose: bool = False) -> 
 
     if verbose:
         console.print("\n[bold]Sections and keys:[/bold]")
-        console.print(f"  (extra detail shown in verbose mode)")
+        console.print("  (extra detail shown in verbose mode)")
 
 
 @project.command()
@@ -254,7 +248,7 @@ def _display_validation_report_human(
 ) -> None:
     """Display validation report in human-readable format."""
     console = Console()
-    console.print(f"[bold]Validation Report[/bold]")
+    console.print("[bold]Validation Report[/bold]")
     console.print(f"  Files scanned: {data['files_scanned']}")
     console.print(f"  Issues found: {data['issues_found']}")
 
@@ -563,7 +557,7 @@ def add_autoload(
                 raise ProjectError(
                     message=f"Autoload '{name}' already exists",
                     code="AUTOLOAD_EXISTS",
-                    fix=f"Remove the existing autoload or choose a different name",
+                    fix="Remove the existing autoload or choose a different name",
                 )
 
         # Check if the target script has a class_name that conflicts (#21)
@@ -775,8 +769,8 @@ def run_project(ctx: click.Context, path: str, quit_after: int) -> None:
         stdout_lines = result.stdout.strip().splitlines() if result.stdout else []
         stderr_lines = result.stderr.strip().splitlines() if result.stderr else []
 
-        errors = [l for l in stderr_lines if "ERROR" in l or "SCRIPT ERROR" in l]
-        warnings = [l for l in stderr_lines if "WARNING" in l]
+        errors = [line for line in stderr_lines if "ERROR" in line or "SCRIPT ERROR" in line]
+        warnings = [line for line in stderr_lines if "WARNING" in line]
 
         data = {
             "success": result.returncode == 0 and len(errors) == 0,
@@ -875,8 +869,8 @@ def test_project(ctx: click.Context, path: str, quit_after: int, check_only: boo
                 result = backend.check_only(project_root)
                 if result.stderr:
                     script_errors = [
-                        l for l in result.stderr.strip().splitlines()
-                        if "ERROR" in l or "error" in l.lower()
+                        line for line in result.stderr.strip().splitlines()
+                        if "ERROR" in line or "error" in line.lower()
                     ]
             except Exception as exc:
                 script_errors.append(str(exc))

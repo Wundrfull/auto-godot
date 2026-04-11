@@ -1179,6 +1179,98 @@ def list_nodes(ctx: click.Context, scene_path: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# scene tree
+# ---------------------------------------------------------------------------
+
+
+@scene.command("tree")
+@click.argument("scene_path", type=click.Path(exists=True))
+@click.option("--no-types", is_flag=True, help="Hide node type annotations")
+@click.pass_context
+def tree_cmd(ctx: click.Context, scene_path: str, no_types: bool) -> None:
+    """Display scene hierarchy as an indented tree.
+
+    Examples:
+
+      auto-godot scene tree scenes/main.tscn
+
+      auto-godot scene tree --no-types scenes/player.tscn
+    """
+    try:
+        text = Path(scene_path).read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+        nodes = scene_data.nodes
+        if not nodes:
+            raise ProjectError(
+                message="Scene has no nodes",
+                code="EMPTY_SCENE",
+                fix="Ensure the file is a valid .tscn scene with at least one node",
+            )
+
+        root = nodes[0]
+        # Map full path -> list of child nodes
+        children: dict[str, list[SceneNode]] = {}
+        for node in nodes[1:]:
+            parent_key = node.parent or "."
+            children.setdefault(parent_key, []).append(node)
+
+        def _node_path(node: SceneNode) -> str:
+            if node.parent is None or node.parent == "":
+                return "."
+            if node.parent == ".":
+                return node.name
+            return f"{node.parent}/{node.name}"
+
+        def _build_json(node: SceneNode) -> dict[str, Any]:
+            path = _node_path(node)
+            entry: dict[str, Any] = {"name": node.name}
+            if node.type:
+                entry["type"] = node.type
+            if node.instance:
+                entry["instance"] = node.instance
+            child_nodes = children.get(path, [])
+            if child_nodes:
+                entry["children"] = [_build_json(c) for c in child_nodes]
+            return entry
+
+        data = {
+            "tree": _build_json(root),
+            "count": len(nodes),
+            "scene": scene_path,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            def _label(node: SceneNode) -> str:
+                if no_types:
+                    return node.name
+                type_str = node.type or "instance"
+                return f"{node.name} [{type_str}]"
+
+            rich_tree = Tree(_label(root))
+
+            def _add_children(parent_tree: Tree, parent_path: str) -> None:
+                for child in children.get(parent_path, []):
+                    child_tree = parent_tree.add(_label(child))
+                    _add_children(child_tree, _node_path(child))
+
+            _add_children(rich_tree, ".")
+            Console().print(rich_tree)
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to parse scene: {exc}",
+                code="PARSE_ERROR",
+                fix="Ensure the file is a valid .tscn scene file",
+            ),
+            ctx,
+        )
+
+
+# ---------------------------------------------------------------------------
 # scene count-nodes
 # ---------------------------------------------------------------------------
 

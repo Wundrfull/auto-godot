@@ -119,6 +119,17 @@ class TestParseGdscript:
         assert "Deal damage" in td.get("doc", "")
 
 
+    def test_generic_return_type(self) -> None:
+        text = "func get_items() -> Array[int]:\n\treturn []\n"
+        doc = parse_gdscript(text, "g.gd")
+        assert doc.functions[0]["return_type"] == "Array[int]"
+
+    def test_trailing_whitespace_top_level(self) -> None:
+        text = "extends Node\nvar x: int = 0  \n"
+        doc = parse_gdscript(text, "t.gd")
+        assert len(doc.variables) == 1
+
+
 class TestEdgeCases:
     def test_empty_script(self) -> None:
         doc = parse_gdscript("", "e.gd")
@@ -194,3 +205,16 @@ class TestDocsCommand:
         d = tmp_path / "empty"
         d.mkdir()
         assert CliRunner().invoke(cli, ["script", "docs", str(d)]).exit_code != 0
+
+    def test_duplicate_stem_collision(self, tmp_path: Path) -> None:
+        (tmp_path / "scripts").mkdir()
+        (tmp_path / "addons").mkdir()
+        (tmp_path / "scripts" / "player.gd").write_text("extends Node2D\n")
+        (tmp_path / "addons" / "player.gd").write_text("extends Node\n")
+        out = tmp_path / "docs"
+        result = CliRunner().invoke(
+            cli, ["script", "docs", str(tmp_path), "-o", str(out)]
+        )
+        assert result.exit_code == 0
+        md_files = list(out.glob("*.md"))
+        assert len(md_files) == 2  # no overwrite

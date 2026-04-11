@@ -814,6 +814,72 @@ def list_vars(ctx: click.Context, file_path: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _collect_gd_files(path: str) -> list[Path]:
+    """Resolve path to a list of .gd files."""
+    target = Path(path)
+    if target.is_file():
+        if target.suffix != ".gd":
+            raise ProjectError(
+                message=f"Not a GDScript file: {path}",
+                code="NOT_GDSCRIPT",
+                fix="Provide a .gd file or a directory containing .gd files",
+            )
+        return [target]
+    gd_files = sorted(target.rglob("*.gd"))
+    if not gd_files:
+        raise ProjectError(
+            message=f"No .gd files found in {path}",
+            code="NO_SCRIPTS_FOUND",
+            fix="Check the directory path contains GDScript files",
+        )
+    return gd_files
+
+
+def _write_docs_output(
+    gd_files: list[Path], output_dir: str, base_dir: Path,
+) -> list[dict[str, Any]]:
+    """Parse files and write Markdown docs, detecting stem collisions."""
+    from auto_godot.gdscript_docs import format_markdown, parse_gdscript
+
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    seen_stems: dict[str, Path] = {}
+    results: list[dict[str, Any]] = []
+    for gd_file in gd_files:
+        stem = gd_file.stem
+        if stem in seen_stems:
+            # Use relative path to disambiguate
+            try:
+                rel = gd_file.relative_to(base_dir)
+            except ValueError:
+                rel = gd_file
+            md_name = str(rel).replace("/", "_").replace("\\", "_")
+            md_name = md_name.rsplit(".", 1)[0] + ".md"
+        else:
+            md_name = stem + ".md"
+        seen_stems[stem] = gd_file
+        text = gd_file.read_text(encoding="utf-8")
+        sd = parse_gdscript(text, str(gd_file))
+        results.append(sd.to_dict())
+        (out_path / md_name).write_text(format_markdown(sd), encoding="utf-8")
+    return results
+
+
+def _display_docs(data: dict[str, Any], verbose: bool = False) -> None:
+    """Human-readable output for script docs."""
+    from auto_godot.gdscript_docs import format_markdown, parse_gdscript
+
+    if data.get("output_dir"):
+        click.echo(
+            f"Generated docs for {data['count']} script(s) "
+            f"in {data['output_dir']}/"
+        )
+        return
+    for script_data in data["scripts"]:
+        text = Path(script_data["path"]).read_text(encoding="utf-8")
+        click.echo(format_markdown(parse_gdscript(text, script_data["path"])))
+
+
 @script.command("docs")
 @click.argument("path", type=click.Path(exists=True))
 @click.option(
@@ -839,62 +905,26 @@ def docs(ctx: click.Context, path: str, output_dir: str | None) -> None:
 
       auto-godot --json script docs scripts/player.gd
     """
-    from auto_godot.gdscript_docs import format_markdown, parse_gdscript
+    from auto_godot.gdscript_docs import parse_gdscript
 
     try:
-        target = Path(path)
-        gd_files: list[Path] = []
-
-        if target.is_file():
-            if not target.suffix == ".gd":
-                raise ProjectError(
-                    message=f"Not a GDScript file: {path}",
-                    code="NOT_GDSCRIPT",
-                    fix="Provide a .gd file or a directory containing .gd files",
-                )
-            gd_files.append(target)
+        gd_files = _collect_gd_files(path)
+        if output_dir is not None:
+            results = _write_docs_output(gd_files, output_dir, Path(path))
         else:
-            gd_files = sorted(target.rglob("*.gd"))
-            if not gd_files:
-                raise ProjectError(
-                    message=f"No .gd files found in {path}",
-                    code="NO_SCRIPTS_FOUND",
-                    fix="Check the directory path contains GDScript files",
-                )
-
-        results: list[dict[str, Any]] = []
-        for gd_file in gd_files:
-            text = gd_file.read_text(encoding="utf-8")
-            script_doc = parse_gdscript(text, str(gd_file))
-            results.append(script_doc.to_dict())
-
-            if output_dir is not None:
-                out_path = Path(output_dir)
-                out_path.mkdir(parents=True, exist_ok=True)
-                md_name = gd_file.stem + ".md"
-                md_path = out_path / md_name
-                md_path.write_text(format_markdown(script_doc), encoding="utf-8")
-
-        data: dict[str, Any] = {
-            "scripts": results,
-            "count": len(results),
-        }
+            results = []
+            for gd_file in gd_files:
+                text = gd_file.read_text(encoding="utf-8")
+                results.append(parse_gdscript(text, str(gd_file)).to_dict())
+        data: dict[str, Any] = {"scripts": results, "count": len(results)}
         if output_dir is not None:
             data["output_dir"] = output_dir
-
-        def _human(data: dict[str, Any], verbose: bool = False) -> None:
-            if data.get("output_dir"):
-                click.echo(
-                    f"Generated docs for {data['count']} script(s) "
-                    f"in {data['output_dir']}/"
-                )
-                return
-            # Single-file mode without -o: print markdown to stdout
-            for script_data in data["scripts"]:
-                gd_text = Path(script_data["path"]).read_text(encoding="utf-8")
-                sd = parse_gdscript(gd_text, script_data["path"])
-                click.echo(format_markdown(sd))
-
-        emit(data, _human, ctx)
-    except ProjectError as exc:
+        emit(data, _display_docs, ctx)
+    except (ProjectError, OSError) as exc:
+        if isinstance(exc, OSError):
+            exc = ProjectError(
+                message=f"File error: {exc}",
+                code="IO_ERROR",
+                fix="Check file permissions and paths",
+            )
         emit_error(exc, ctx)

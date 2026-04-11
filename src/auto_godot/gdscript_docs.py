@@ -18,7 +18,7 @@ _SIGNAL = re.compile(r"^signal\s+(\w+)(?:\(([^)]*)\))?")
 _CONST = re.compile(r"^const\s+(\w+)(?:\s*:\s*\w+)?\s*=\s*(.+)")
 _EXPORT = re.compile(r"^@export(?:_\w+(?:\([^)]*\))?)?\s+var\s+(\w+)\s*(?::\s*([^=]+?))?\s*(?:=\s*(.+))?$")
 _VAR = re.compile(r"^var\s+(\w+)\s*(?::\s*([^=]+?))?\s*(?:=\s*(.+))?$")
-_FUNC = re.compile(r"^(static\s+)?func\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*(\w+))?")
+_FUNC = re.compile(r"^(static\s+)?func\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([\w\[\], ]+))?")
 _ENUM_START = re.compile(r"^enum\s+(\w+)\s*\{(.*)")
 _DOC_COMMENT = re.compile(r"^##\s?(.*)")
 
@@ -64,6 +64,7 @@ class ScriptDoc:
     functions: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-serializable dict, omitting empty sections."""
         result: dict[str, Any] = {"path": self.path}
         if self.class_name:
             result["class_name"] = self.class_name
@@ -78,12 +79,8 @@ class ScriptDoc:
         return result
 
 
-def parse_gdscript(text: str, file_path: str = "") -> ScriptDoc:
-    """Parse a GDScript file and extract documentation."""
-    doc = ScriptDoc(path=file_path)
-    lines = text.split("\n")
-
-    # File-level doc comment (## lines before class_name/extends)
+def _extract_file_description(lines: list[str]) -> str:
+    """Extract ## doc comment block before class_name/extends."""
     file_doc: list[str] = []
     for line in lines:
         stripped = line.strip()
@@ -95,66 +92,58 @@ def parse_gdscript(text: str, file_path: str = "") -> ScriptDoc:
                 break
         else:
             break
-    doc.description = "\n".join(file_doc).strip()
+    return "\n".join(file_doc).strip()
 
-    i = 0
-    while i < len(lines):
-        raw = lines[i]
-        s = raw.strip()
-        top = raw == s or raw == ""
 
-        if top and (m := _CLASS_NAME.match(s)):
-            doc.class_name = m.group(1)
-        elif top and (m := _EXTENDS.match(s)):
-            doc.extends = m.group(1)
-        elif top and (m := _ENUM_START.match(s)):
-            vals = _parse_enum_values(lines, i, m.group(2))
-            entry: dict[str, Any] = {"name": m.group(1), "values": vals, "line": i + 1}
-            comment = _collect_doc(lines, i)
-            if comment:
-                entry["doc"] = comment
-            doc.enums.append(entry)
-        elif top and (m := _SIGNAL.match(s)):
-            entry = {"name": m.group(1), "signature": s, "line": i + 1}
-            comment = _collect_doc(lines, i)
-            if comment:
-                entry["doc"] = comment
-            doc.signals.append(entry)
-        elif top and (m := _CONST.match(s)):
-            entry = {"name": m.group(1), "signature": s, "line": i + 1}
-            comment = _collect_doc(lines, i)
-            if comment:
-                entry["doc"] = comment
-            doc.constants.append(entry)
-        elif top and (m := _EXPORT.match(s)):
-            entry = {"name": m.group(1), "signature": s, "line": i + 1}
-            comment = _collect_doc(lines, i)
-            if comment:
-                entry["doc"] = comment
-            doc.exports.append(entry)
-        elif top and (m := _VAR.match(s)):
-            entry = {"name": m.group(1), "signature": s, "line": i + 1}
-            comment = _collect_doc(lines, i)
-            if comment:
-                entry["doc"] = comment
-            doc.variables.append(entry)
-        elif top and (m := _FUNC.match(s)):
-            entry = {
-                "name": m.group(2), "params": m.group(3).strip(),
-                "return_type": m.group(4) or "void", "line": i + 1,
-            }
-            if m.group(1):
-                entry["static"] = True
-            comment = _collect_doc(lines, i)
-            if comment:
-                entry["doc"] = comment
-            doc.functions.append(entry)
-        i += 1
+def _make_entry(name: str, lines: list[str], i: int, **extra: Any) -> dict[str, Any]:
+    """Build a doc entry dict with optional doc comment."""
+    entry: dict[str, Any] = {"name": name, "line": i + 1, **extra}
+    comment = _collect_doc(lines, i)
+    if comment:
+        entry["doc"] = comment
+    return entry
+
+
+def _parse_declaration(doc: ScriptDoc, lines: list[str], i: int, s: str) -> None:
+    """Try to match a single top-level declaration and append to doc."""
+    if m := _CLASS_NAME.match(s):
+        doc.class_name = m.group(1)
+    elif m := _EXTENDS.match(s):
+        doc.extends = m.group(1)
+    elif m := _ENUM_START.match(s):
+        vals = _parse_enum_values(lines, i, m.group(2))
+        doc.enums.append(_make_entry(m.group(1), lines, i, values=vals))
+    elif m := _SIGNAL.match(s):
+        doc.signals.append(_make_entry(m.group(1), lines, i, signature=s))
+    elif m := _CONST.match(s):
+        doc.constants.append(_make_entry(m.group(1), lines, i, signature=s))
+    elif m := _EXPORT.match(s):
+        doc.exports.append(_make_entry(m.group(1), lines, i, signature=s))
+    elif m := _VAR.match(s):
+        doc.variables.append(_make_entry(m.group(1), lines, i, signature=s))
+    elif m := _FUNC.match(s):
+        extra: dict[str, Any] = {
+            "params": m.group(3).strip(),
+            "return_type": (m.group(4) or "void").strip(),
+        }
+        if m.group(1):
+            extra["static"] = True
+        doc.functions.append(_make_entry(m.group(2), lines, i, **extra))
+
+
+def parse_gdscript(text: str, file_path: str = "") -> ScriptDoc:
+    """Parse a GDScript file and extract documentation."""
+    doc = ScriptDoc(path=file_path)
+    lines = text.split("\n")
+    doc.description = _extract_file_description(lines)
+    for i, raw in enumerate(lines):
+        if not raw[:1].isspace():
+            _parse_declaration(doc, lines, i, raw.strip())
     return doc
 
 
-def format_markdown(sd: ScriptDoc) -> str:
-    """Format a ScriptDoc as Markdown."""
+def _md_header(sd: ScriptDoc) -> list[str]:
+    """Render title, extends, and description."""
     p: list[str] = []
     title = sd.class_name or Path(sd.path).stem
     p.append(f"# {title}\n")
@@ -162,6 +151,12 @@ def format_markdown(sd: ScriptDoc) -> str:
         p.append(f"**Extends:** `{sd.extends}`\n")
     if sd.description:
         p.append(sd.description + "\n")
+    return p
+
+
+def _md_sections(sd: ScriptDoc) -> list[str]:
+    """Render signals, enums, constants, exports, variables, functions."""
+    p: list[str] = []
     if sd.signals:
         p.append("## Signals\n")
         for sig in sd.signals:
@@ -174,8 +169,7 @@ def format_markdown(sd: ScriptDoc) -> str:
             p.append(f"### {en['name']}\n")
             if en.get("doc"):
                 p.append(en["doc"] + "\n")
-            for val in en["values"]:
-                p.append(f"- `{val}`")
+            p.extend(f"- `{val}`" for val in en["values"])
             p.append("")
     if sd.constants:
         p.append("## Constants\n")
@@ -206,4 +200,10 @@ def format_markdown(sd: ScriptDoc) -> str:
             p.append(f"### `{static}func {fn['name']}({fn['params']}) -> {fn['return_type']}`\n")
             if fn.get("doc"):
                 p.append(fn["doc"] + "\n")
-    return "\n".join(p).rstrip() + "\n"
+    return p
+
+
+def format_markdown(sd: ScriptDoc) -> str:
+    """Format a ScriptDoc as Markdown."""
+    parts = _md_header(sd) + _md_sections(sd)
+    return "\n".join(parts).rstrip() + "\n"

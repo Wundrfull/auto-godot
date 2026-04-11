@@ -200,32 +200,47 @@ def list_presets(
 
 def _parse_presets(text: str) -> list[dict[str, Any]]:
     """Parse export_presets.cfg into a list of preset dicts."""
+    return [
+        {k: v for k, v in p.items() if k != "options"}
+        for p in _parse_presets_full(text)
+    ]
+
+
+def _parse_presets_full(text: str) -> list[dict[str, Any]]:
+    """Parse export_presets.cfg with all fields and options."""
     import re
     presets: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
+    in_options = False
 
     for line in text.splitlines():
         # New preset section
-        match = re.match(r'\[preset\.(\d+)\]', line)
+        match = re.match(r"\[preset\.(\d+)\]", line)
         if match:
             if current is not None:
                 presets.append(current)
-            current = {"index": int(match.group(1))}
+            current = {"index": int(match.group(1)), "options": {}}
+            in_options = False
             continue
 
-        # Options subsection (skip)
-        if re.match(r'\[preset\.\d+\.options\]', line):
+        # Options subsection
+        if re.match(r"\[preset\.\d+\.options\]", line):
+            in_options = True
             continue
 
-        # Key=value in current preset
+        # Key=value
         if current is not None and "=" in line:
             key, _, value = line.partition("=")
             key = key.strip()
             value = value.strip().strip('"')
-            if key in ("name", "platform", "export_path"):
-                current[key] = value
+            if in_options:
+                current["options"][key] = value
             elif key == "runnable":
                 current[key] = value == "true"
+            elif key == "dedicated_server":
+                current[key] = value == "true"
+            else:
+                current[key] = value
 
     if current is not None:
         presets.append(current)
@@ -250,3 +265,168 @@ def list_platforms(ctx: click.Context) -> None:
             click.echo(f"  {p['key']:12s} {p['name']:20s} -> {p['export_path']}")
 
     emit(data, _human, ctx)
+
+
+# ---------------------------------------------------------------------------
+# preset inspect
+# ---------------------------------------------------------------------------
+
+
+@preset.command("inspect")
+@click.argument("preset_name")
+@click.option(
+    "--project", "project_path", default=".", type=click.Path(),
+    help="Project directory (default: current directory).",
+)
+@click.pass_context
+def inspect(ctx: click.Context, preset_name: str, project_path: str) -> None:
+    """Inspect a specific export preset by name.
+
+    Shows all configuration fields and options for the named preset.
+
+    Examples:
+
+      auto-godot preset inspect "Windows Desktop"
+
+      auto-godot --json preset inspect "Linux" --project /path/to/project
+    """
+    try:
+        project_dir = Path(project_path)
+        if project_dir.is_file():
+            project_dir = project_dir.parent
+
+        preset_file = project_dir / "export_presets.cfg"
+        if not preset_file.exists():
+            raise ProjectError(
+                message="No export_presets.cfg found",
+                code="NO_PRESETS",
+                fix="Create presets with: auto-godot preset create --platform windows",
+            )
+
+        presets = _parse_presets_full(preset_file.read_text(encoding="utf-8"))
+        match = next((p for p in presets if p.get("name") == preset_name), None)
+
+        if match is None:
+            names = [p.get("name", "(unnamed)") for p in presets]
+            raise ProjectError(
+                message=f"Preset '{preset_name}' not found",
+                code="PRESET_NOT_FOUND",
+                fix=f"Available presets: {', '.join(names)}",
+            )
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            click.echo(f"Preset: {data.get('name', '(unnamed)')}")
+            for key, val in data.items():
+                if key == "options":
+                    continue
+                click.echo(f"  {key}: {val}")
+            opts = data.get("options", {})
+            if opts:
+                click.echo(f"  options ({len(opts)}):")
+                for k, v in opts.items():
+                    click.echo(f"    {k} = {v}")
+
+        emit(match, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
+
+
+# ---------------------------------------------------------------------------
+# preset validate
+# ---------------------------------------------------------------------------
+
+
+@preset.command("validate")
+@click.argument("project_path", default=".", type=click.Path())
+@click.pass_context
+def validate(ctx: click.Context, project_path: str) -> None:
+    """Validate export presets for common issues.
+
+    Checks: duplicate names, missing export paths, unrecognized
+    platforms, and whether export directories exist.
+
+    Examples:
+
+      auto-godot preset validate
+
+      auto-godot --json preset validate /path/to/project
+    """
+    try:
+        project_dir = Path(project_path)
+        if project_dir.is_file():
+            project_dir = project_dir.parent
+
+        preset_file = project_dir / "export_presets.cfg"
+        if not preset_file.exists():
+            raise ProjectError(
+                message="No export_presets.cfg found",
+                code="NO_PRESETS",
+                fix="Create presets with: auto-godot preset create --platform windows",
+            )
+
+        presets = _parse_presets_full(preset_file.read_text(encoding="utf-8"))
+        warnings: list[dict[str, str]] = []
+        known_platforms = {info["platform"] for info in _PLATFORMS.values()}
+
+        # Check for duplicate names
+        names: list[str] = []
+        for p in presets:
+            name = p.get("name", "")
+            if name in names:
+                warnings.append({
+                    "preset": name,
+                    "issue": "duplicate_name",
+                    "message": f"Duplicate preset name: '{name}'",
+                })
+            names.append(name)
+
+        for p in presets:
+            name = p.get("name", f"preset.{p.get('index', '?')}")
+
+            # Missing export path
+            if not p.get("export_path"):
+                warnings.append({
+                    "preset": name,
+                    "issue": "missing_export_path",
+                    "message": "No export_path configured",
+                })
+
+            # Check platform
+            platform = p.get("platform", "")
+            if platform and platform not in known_platforms:
+                warnings.append({
+                    "preset": name,
+                    "issue": "unknown_platform",
+                    "message": f"Unrecognized platform: '{platform}'",
+                })
+
+            # Check export directory exists
+            export_path = p.get("export_path", "")
+            if export_path:
+                full = project_dir / export_path
+                if not full.parent.exists():
+                    warnings.append({
+                        "preset": name,
+                        "issue": "missing_export_dir",
+                        "message": f"Export directory does not exist: {full.parent}",
+                    })
+
+        data = {
+            "valid": len(warnings) == 0,
+            "preset_count": len(presets),
+            "warning_count": len(warnings),
+            "warnings": warnings,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            count = data["preset_count"]
+            if data["valid"]:
+                click.echo(f"All {count} preset(s) valid.")
+                return
+            click.echo(f"Found {data['warning_count']} issue(s) in {count} preset(s):")
+            for w in data["warnings"]:
+                click.echo(f"  [{w['preset']}] {w['message']}")
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)

@@ -629,8 +629,43 @@ def _parse_string_content(text: str) -> str:
             elif next_ch == 'u' and i + 5 < length + 1:
                 hex_digits = inner[i + 2:i + 6]
                 if len(hex_digits) == 4 and all(c in "0123456789abcdefABCDEF" for c in hex_digits):
-                    result.append(chr(int(hex_digits, 16)))
-                    i += 6
+                    code = int(hex_digits, 16)
+                    # UTF-16 surrogate pair: a high surrogate
+                    # (0xD800-0xDBFF) must combine with an adjacent low
+                    # surrogate (0xDC00-0xDFFF). Godot emits pairs for
+                    # code points above the BMP; decoding each half
+                    # independently produces lone surrogates that can't
+                    # round-trip through UTF-8.
+                    if (
+                        0xD800 <= code <= 0xDBFF
+                        and i + 11 < length + 1
+                        and inner[i + 6:i + 8] == '\\u'
+                    ):
+                        low_digits = inner[i + 8:i + 12]
+                        if (
+                            len(low_digits) == 4
+                            and all(c in "0123456789abcdefABCDEF" for c in low_digits)
+                        ):
+                            low = int(low_digits, 16)
+                            if 0xDC00 <= low <= 0xDFFF:
+                                combined = (
+                                    (code - 0xD800) * 0x400
+                                    + (low - 0xDC00)
+                                    + 0x10000
+                                )
+                                result.append(chr(combined))
+                                i += 12
+                                continue
+                    # Lone surrogate: fall through to literal passthrough
+                    # so malformed input round-trips unchanged rather
+                    # than producing a string that breaks UTF-8 encoding.
+                    if 0xD800 <= code <= 0xDFFF:
+                        result.append('\\')
+                        result.append(next_ch)
+                        i += 2
+                    else:
+                        result.append(chr(code))
+                        i += 6
                 else:
                     result.append('\\')
                     result.append(next_ch)

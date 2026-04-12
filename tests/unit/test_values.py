@@ -371,6 +371,20 @@ class TestParseValue:
         # BMP code for a music sheet section symbol
         assert parse_value(r'"\u00a7"') == "§"
 
+    def test_string_unicode_surrogate_pair(self) -> None:
+        # U+1F600 emitted by Godot as UTF-16 pair D83D + DE00.
+        # Decoded independently that gives two lone surrogates; must
+        # combine into the astral code point.
+        assert parse_value(r'"\uD83D\uDE00"') == "\U0001F600"
+
+    def test_string_unicode_lone_high_surrogate(self) -> None:
+        # Lone high surrogate is invalid Unicode; fall through to
+        # literal passthrough so it round-trips unchanged.
+        assert parse_value(r'"\uD800"') == r"\uD800"
+
+    def test_string_unicode_lone_low_surrogate(self) -> None:
+        assert parse_value(r'"\uDC00"') == r"\uDC00"
+
     def test_string_unicode_U_6digit(self) -> None:
         # Extended 6-hex form: U+1F600 (grinning face)
         assert parse_value(r'"\U01F600"') == "\U0001F600"

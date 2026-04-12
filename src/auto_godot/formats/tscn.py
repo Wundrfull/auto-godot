@@ -24,7 +24,7 @@ from auto_godot.formats.tres import (
     _extract_ext_resource,
     _extract_sub_resource,
 )
-from auto_godot.formats.values import serialize_value
+from auto_godot.formats.values import parse_value, serialize_value
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -90,6 +90,7 @@ class Connection:
     method: str
     flags: int | None = None
     binds: list[Any] | None = None
+    unbinds: int | None = None
     raw_section: Section | None = None
 
 
@@ -193,12 +194,20 @@ def _extract_connection(section: Section) -> Connection:
     """Build a Connection from a parsed [connection] section."""
     attrs = section.header.attrs
     flags_str = attrs.get("flags")
+    binds_str = attrs.get("binds")
+    unbinds_str = attrs.get("unbinds")
+    binds: list[Any] | None = None
+    if binds_str:
+        parsed = parse_value(binds_str)
+        binds = parsed if isinstance(parsed, list) else None
     return Connection(
         signal=attrs.get("signal", ""),
         from_node=attrs.get("from", ""),
         to_node=attrs.get("to", ""),
         method=attrs.get("method", ""),
         flags=int(flags_str) if flags_str else None,
+        binds=binds,
+        unbinds=int(unbinds_str) if unbinds_str else None,
         raw_section=section,
     )
 
@@ -325,6 +334,10 @@ def _build_tscn_from_model(scene: GdScene) -> str:
             f'to="{conn.to_node}"',
             f'method="{conn.method}"',
         ]
+        if conn.binds is not None:
+            parts.append(f"binds={serialize_value(conn.binds)}")
+        if conn.unbinds is not None:
+            parts.append(f"unbinds={conn.unbinds}")
         lines.append("[connection " + " ".join(parts) + "]")
 
     return "\n".join(lines) + "\n"

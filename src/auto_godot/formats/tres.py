@@ -186,9 +186,11 @@ def _build_tres_from_model(resource: GdResource) -> str:
     lines: list[str] = []
 
     # File header
+    # load_steps= is intentionally never emitted (Godot 4.6 editor no
+    # longer writes it; #148). The field stays on the model so parsed
+    # resources round-trip the value in memory, but rebuilt output
+    # matches what the editor produces.
     parts = [f'type="{resource.type}"']
-    if resource.load_steps is not None:
-        parts.append(f"load_steps={resource.load_steps}")
     parts.append(f"format={resource.format}")
     if resource.uid:
         parts.append(f'uid="{resource.uid}"')

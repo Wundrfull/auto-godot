@@ -118,6 +118,37 @@ class TestFormat4Parsing:
         assert resource.format == 4
 
 
+class TestLoadStepsNeverEmitted:
+    """#148: load_steps is parsed for round-trip in memory but never
+    re-emitted, matching Godot 4.6 editor output."""
+
+    def test_tscn_parsed_load_steps_not_reemitted(self) -> None:
+        # Scene with an explicit load_steps=5 from a 4.5-era file.
+        # Parse preserves the value on the model. Model rebuild drops it.
+        text = (
+            '[gd_scene load_steps=5 format=3]\n\n'
+            '[node name="Main" type="Control"]\n'
+        )
+        scene = parse_tscn(text)
+        assert scene.load_steps == 5
+        scene._raw_header = None
+        scene._raw_sections = None
+        rebuilt = serialize_tscn(scene)
+        assert "load_steps=" not in rebuilt
+
+    def test_tres_parsed_load_steps_not_reemitted(self) -> None:
+        text = (
+            '[gd_resource type="SpriteFrames" load_steps=3 format=3]\n\n'
+            '[resource]\n'
+        )
+        resource = parse_tres(text)
+        assert resource.load_steps == 3
+        resource._raw_header = None
+        resource._raw_sections = None
+        rebuilt = serialize_tres(resource)
+        assert "load_steps=" not in rebuilt
+
+
 class TestLoadStepsRemoval:
     """COMPAT-01 + BACK-01: generated files omit load_steps."""
 

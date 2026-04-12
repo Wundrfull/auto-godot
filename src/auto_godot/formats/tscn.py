@@ -272,9 +272,11 @@ def _build_tscn_from_model(scene: GdScene) -> str:
     lines: list[str] = []
 
     # File header
+    # load_steps= is intentionally never emitted (Godot 4.6 editor no
+    # longer writes it; #148). The field stays on the model so parsed
+    # scenes round-trip the value in memory, but rebuilt output matches
+    # what the editor produces.
     parts = []
-    if scene.load_steps is not None:
-        parts.append(f"load_steps={scene.load_steps}")
     parts.append(f"format={scene.format}")
     if scene.uid:
         parts.append(f'uid="{scene.uid}"')

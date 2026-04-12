@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.tree import Tree
 
 from auto_godot.errors import AutoGodotError, ProjectError, ValidationError
-from auto_godot.formats.tscn import SceneNode, parse_tscn, serialize_tscn, serialize_tscn_file
+from auto_godot.formats.tscn import SceneNode, parse_tscn, resolve_parent_path, serialize_tscn, serialize_tscn_file
 from auto_godot.formats.uid import write_uid_file
 from auto_godot.formats.values import ExtResourceRef, parse_value, serialize_value
 from auto_godot.output import emit, emit_error
@@ -333,7 +333,7 @@ def add_node(
         text = path.read_text(encoding="utf-8")
         scene_data = parse_tscn(text)
 
-        parent = parent_path or "."
+        parent = resolve_parent_path(scene_data.nodes, parent_path) if parent_path else "."
 
         # Check for duplicate
         for node in scene_data.nodes:
@@ -641,7 +641,7 @@ def add_timer(
         text = path_obj.read_text(encoding="utf-8")
         scene_data = parse_tscn(text)
 
-        parent = parent_path or "."
+        parent = resolve_parent_path(scene_data.nodes, parent_path) if parent_path else "."
 
         for node in scene_data.nodes:
             if node.name == node_name and node.parent == parent:
@@ -750,7 +750,7 @@ def add_instance(
         text = path.read_text(encoding="utf-8")
         scene_data = parse_tscn(text)
 
-        parent = parent_path or "."
+        parent = resolve_parent_path(scene_data.nodes, parent_path) if parent_path else "."
 
         for node in scene_data.nodes:
             if node.name == node_name and node.parent == parent:
@@ -974,7 +974,7 @@ def add_camera(
         path_obj = Path(scene_path)
         text = path_obj.read_text(encoding="utf-8")
         scene_data = parse_tscn(text)
-        parent = parent_path or "."
+        parent = resolve_parent_path(scene_data.nodes, parent_path) if parent_path else "."
 
         for node in scene_data.nodes:
             if node.name == node_name and node.parent == parent:
@@ -1203,6 +1203,98 @@ def list_nodes(ctx: click.Context, scene_path: str) -> None:
                 click.echo(f"  {node['name']}{type_str}{parent_str}{groups_str}")
 
         emit(data, _human, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to parse scene: {exc}",
+                code="PARSE_ERROR",
+                fix="Ensure the file is a valid .tscn scene file",
+            ),
+            ctx,
+        )
+
+
+# ---------------------------------------------------------------------------
+# scene tree
+# ---------------------------------------------------------------------------
+
+
+@scene.command("tree")
+@click.argument("scene_path", type=click.Path(exists=True))
+@click.option("--no-types", is_flag=True, help="Hide node type annotations")
+@click.pass_context
+def tree_cmd(ctx: click.Context, scene_path: str, no_types: bool) -> None:
+    """Display scene hierarchy as an indented tree.
+
+    Examples:
+
+      auto-godot scene tree scenes/main.tscn
+
+      auto-godot scene tree --no-types scenes/player.tscn
+    """
+    try:
+        text = Path(scene_path).read_text(encoding="utf-8")
+        scene_data = parse_tscn(text)
+        nodes = scene_data.nodes
+        if not nodes:
+            raise ProjectError(
+                message="Scene has no nodes",
+                code="EMPTY_SCENE",
+                fix="Ensure the file is a valid .tscn scene with at least one node",
+            )
+
+        root = nodes[0]
+        # Map full path -> list of child nodes
+        children: dict[str, list[SceneNode]] = {}
+        for node in nodes[1:]:
+            parent_key = node.parent or "."
+            children.setdefault(parent_key, []).append(node)
+
+        def _node_path(node: SceneNode) -> str:
+            if node.parent is None or node.parent == "":
+                return "."
+            if node.parent == ".":
+                return node.name
+            return f"{node.parent}/{node.name}"
+
+        def _build_json(node: SceneNode) -> dict[str, Any]:
+            path = _node_path(node)
+            entry: dict[str, Any] = {"name": node.name}
+            if node.type:
+                entry["type"] = node.type
+            if node.instance:
+                entry["instance"] = node.instance
+            child_nodes = children.get(path, [])
+            if child_nodes:
+                entry["children"] = [_build_json(c) for c in child_nodes]
+            return entry
+
+        data = {
+            "tree": _build_json(root),
+            "count": len(nodes),
+            "scene": scene_path,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            def _label(node: SceneNode) -> str:
+                if no_types:
+                    return node.name
+                type_str = node.type or "instance"
+                return f"{node.name} [{type_str}]"
+
+            rich_tree = Tree(_label(root))
+
+            def _add_children(parent_tree: Tree, parent_path: str) -> None:
+                for child in children.get(parent_path, []):
+                    child_tree = parent_tree.add(_label(child))
+                    _add_children(child_tree, _node_path(child))
+
+            _add_children(rich_tree, ".")
+            Console().print(rich_tree)
+
+        emit(data, _human, ctx)
+    except ProjectError as exc:
+        emit_error(exc, ctx)
     except Exception as exc:
         emit_error(
             ProjectError(
@@ -2177,6 +2269,118 @@ def validate_scene(ctx: click.Context, scene_path: str) -> None:
                 message=f"Failed to parse scene: {exc}",
                 code="PARSE_ERROR",
                 fix="Ensure the file is a valid .tscn scene file",
+            ),
+            ctx,
+        )
+
+
+# ---------------------------------------------------------------------------
+# scene diff
+# ---------------------------------------------------------------------------
+
+
+def _node_full_path(node: SceneNode) -> str:
+    """Compute comparison key for a node."""
+    if node.parent is None or node.parent == "":
+        return node.name
+    if node.parent == ".":
+        return node.name
+    return f"{node.parent}/{node.name}"
+
+
+def _diff_properties(
+    old_props: dict[str, Any], new_props: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare two property dicts. Returns changes as {key: {old, new}}."""
+    changes: dict[str, Any] = {}
+    for key in sorted(set(old_props) | set(new_props)):
+        old_val = old_props.get(key)
+        new_val = new_props.get(key)
+        if str(old_val) != str(new_val):
+            changes[key] = {
+                "old": str(old_val) if old_val is not None else None,
+                "new": str(new_val) if new_val is not None else None,
+            }
+    return changes
+
+
+@scene.command("diff")
+@click.argument("scene_a", type=click.Path(exists=True))
+@click.argument("scene_b", type=click.Path(exists=True))
+@click.pass_context
+def diff_scenes(ctx: click.Context, scene_a: str, scene_b: str) -> None:
+    """Structurally compare two .tscn scene files.
+
+    Reports added, removed, and modified nodes with property changes.
+    Ignores non-semantic differences like key ordering.
+
+    Examples:
+
+      auto-godot scene diff scenes/old.tscn scenes/new.tscn
+    """
+    try:
+        a_data = parse_tscn(Path(scene_a).read_text(encoding="utf-8"))
+        b_data = parse_tscn(Path(scene_b).read_text(encoding="utf-8"))
+
+        a_map = {_node_full_path(n): n for n in a_data.nodes}
+        b_map = {_node_full_path(n): n for n in b_data.nodes}
+        a_paths, b_paths = set(a_map), set(b_map)
+
+        added = sorted(b_paths - a_paths)
+        removed = sorted(a_paths - b_paths)
+        modified: list[dict[str, Any]] = []
+        for path in sorted(a_paths & b_paths):
+            prop_diff = _diff_properties(a_map[path].properties, b_map[path].properties)
+            type_changed = a_map[path].type != b_map[path].type
+            if prop_diff or type_changed:
+                entry: dict[str, Any] = {"path": path}
+                if type_changed:
+                    entry["type"] = {"old": a_map[path].type, "new": b_map[path].type}
+                if prop_diff:
+                    entry["properties"] = prop_diff
+                modified.append(entry)
+
+        a_conns = {(c.signal, c.from_node, c.to_node, c.method) for c in a_data.connections}
+        b_conns = {(c.signal, c.from_node, c.to_node, c.method) for c in b_data.connections}
+        added_conns = [{"signal": s, "from": f, "to": t, "method": m} for s, f, t, m in sorted(b_conns - a_conns)]
+        removed_conns = [{"signal": s, "from": f, "to": t, "method": m} for s, f, t, m in sorted(a_conns - b_conns)]
+
+        has_changes = bool(added or removed or modified or added_conns or removed_conns)
+        data: dict[str, Any] = {
+            "has_changes": has_changes,
+            "added_nodes": [{"path": p, "type": b_map[p].type} for p in added],
+            "removed_nodes": [{"path": p, "type": a_map[p].type} for p in removed],
+            "modified_nodes": modified,
+            "added_connections": added_conns,
+            "removed_connections": removed_conns,
+        }
+
+        def _human(data: dict[str, Any], verbose: bool = False) -> None:
+            if not data["has_changes"]:
+                click.echo("Scenes are structurally identical.")
+                return
+            for n in data["added_nodes"]:
+                click.echo(f"  + {n['path']} [{n['type']}]")
+            for n in data["removed_nodes"]:
+                click.echo(f"  - {n['path']} [{n['type']}]")
+            for n in data["modified_nodes"]:
+                click.echo(f"  ~ {n['path']}")
+                if "type" in n:
+                    click.echo(f"      type: {n['type']['old']} -> {n['type']['new']}")
+                for prop, ch in n.get("properties", {}).items():
+                    click.echo(f"      {prop}: {ch['old'] or '(unset)'} -> {ch['new'] or '(unset)'}")
+            for c in data["added_connections"]:
+                click.echo(f"  + connection: {c['signal']} {c['from']} -> {c['to']}.{c['method']}")
+            for c in data["removed_connections"]:
+                click.echo(f"  - connection: {c['signal']} {c['from']} -> {c['to']}.{c['method']}")
+
+        emit(data, _human, ctx)
+    except Exception as exc:
+        emit_error(
+            ProjectError(
+                message=f"Failed to diff scenes: {exc}",
+                code="DIFF_ERROR",
+                fix="Ensure both files are valid .tscn scene files",
             ),
             ctx,
         )

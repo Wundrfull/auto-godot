@@ -152,6 +152,17 @@ def _do_import_aseprite(
             "will have no animation data"
         )
 
+    # Warn when frames have non-uniform sizes (causes animation jitter)
+    if len(aseprite_data.frames) > 1:
+        sizes = {(f.frame.w, f.frame.h) for f in aseprite_data.frames}
+        if len(sizes) > 1:
+            size_list = ", ".join(f"{w}x{h}" for w, h in sorted(sizes))
+            warnings_list.append(
+                f"Frames have non-uniform sizes ({size_list}); "
+                "this may cause animation jitter. "
+                "Re-export with --no-trim to fix."
+            )
+
     image_res_path = _resolve_image_path(
         res_path, aseprite_data.meta.image, output,
     )
@@ -293,11 +304,8 @@ def _print_import_result(data: dict[str, Any], verbose: bool = False) -> None:
     frames = data["frame_count"]
     click.echo(f"Created {output} with {anims} animation(s) ({frames} frames)")
     if data.get("warnings"):
-        click.echo(
-            f"  Warning: {len(data['warnings'])} animation(s) skipped"
-            " due to errors",
-            err=True,
-        )
+        for warning in data["warnings"]:
+            click.echo(f"  Warning: {warning}", err=True)
 
 
 def _emit_result(
@@ -317,6 +325,119 @@ def _emit_result(
         "warnings": warnings_list,
     }
     emit(data, _print_import_result, ctx)
+
+
+# ---------------------------------------------------------------------------
+# sprite import-texturepacker
+# ---------------------------------------------------------------------------
+
+
+@sprite.command("import-texturepacker")
+@click.argument("json_file", type=click.Path(exists=True))
+@click.option(
+    "-o", "--output", type=click.Path(), default=None,
+    help="Output .tres path. Default: replaces .json with .tres.",
+)
+@click.option(
+    "--res-path", type=str, default=None,
+    help="Godot res:// path for the atlas texture.",
+)
+@click.option(
+    "--fps", type=float, default=10.0,
+    help="Animation FPS (default: 10). TexturePacker has no duration info.",
+)
+@click.pass_context
+def import_texturepacker(
+    ctx: click.Context,
+    json_file: str,
+    output: str | None,
+    res_path: str | None,
+    fps: float,
+) -> None:
+    """Convert TexturePacker JSON atlas exports to Godot SpriteFrames .tres.
+
+    Reads a TexturePacker JSON metadata file and generates a SpriteFrames
+    resource. Frames are grouped into animations by filename prefix
+    (strips trailing numbers: idle_0, idle_1 -> animation "idle").
+
+    Examples:
+
+      auto-godot sprite import-texturepacker atlas.json
+
+      auto-godot sprite import-texturepacker atlas.json -o sprites/atlas.tres --fps 12
+    """
+    from auto_godot.formats.texturepacker import (
+        group_frames_by_animation,
+        parse_texturepacker_json,
+    )
+    from auto_godot.formats.tres import SubResource
+
+    try:
+        json_path = Path(json_file)
+        frames, meta_image = parse_texturepacker_json(json_path, fps=fps)
+
+        if not frames:
+            emit_error(
+                AutoGodotError(
+                    message="TexturePacker JSON contains zero frames",
+                    code="TEXTUREPACKER_NO_FRAMES",
+                    fix="Check the TexturePacker export contains sprite data",
+                ),
+                ctx,
+            )
+            return
+
+        image_res_path = _resolve_image_path(res_path, meta_image, output)
+
+        ext = ExtResource(
+            type="Texture2D",
+            path=image_res_path,
+            id=generate_resource_id("Texture2D"),
+            uid=None,
+        )
+
+        groups = group_frames_by_animation(frames)
+        all_sub_resources: list[SubResource] = []
+        animations: list[dict[str, Any]] = []
+
+        for anim_name, anim_frames in groups.items():
+            tag = AsepriteTag(
+                name=anim_name,
+                from_frame=0,
+                to_frame=len(anim_frames) - 1,
+                direction=AniDirection.FORWARD,
+                repeat=0,
+            )
+            tag_subs, anim_dict = build_animation_for_tag(
+                tag, anim_frames, ext,
+            )
+            all_sub_resources.extend(tag_subs)
+            animations.append(anim_dict)
+
+        resource = GdResource(
+            type="SpriteFrames", format=3,
+            uid=uid_to_text(generate_uid()),
+            load_steps=None,
+            ext_resources=[ext],
+            sub_resources=all_sub_resources,
+            resource_properties={"animations": animations},
+        )
+
+        output_path = _resolve_output_path(output, json_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        serialize_tres_file(resource, output_path)
+
+        data: dict[str, Any] = {
+            "output_path": str(output_path),
+            "animation_count": len(animations),
+            "frame_count": len(all_sub_resources),
+            "image_path": image_res_path,
+            "animations": [str(a.get("name", "")) for a in animations],
+            "warnings": [],
+        }
+        emit(data, _print_import_result, ctx)
+    except (ValidationError, AutoGodotError) as exc:
+        emit_error(exc, ctx)
 
 
 @sprite.command("split")
@@ -824,7 +945,7 @@ _DEFAULT_ASEPRITE = r"C:\Program Files (x86)\Steam\steamapps\common\Aseprite\Ase
               help="Path to Aseprite binary. Default: ASEPRITE_PATH env or standard install.")
 @click.option("--sheet-type", type=click.Choice(["packed", "rows", "horizontal", "vertical"]),
               default="packed", help="Sprite sheet layout (default: packed).")
-@click.option("--trim/--no-trim", default=True, help="Trim transparent pixels (default: yes).")
+@click.option("--trim/--no-trim", default=False, help="Trim transparent pixels (default: no). Trimming can cause animation jitter from non-uniform frame sizes.")
 @click.option("--import-tres/--no-import-tres", "do_import", default=True,
               help="Also generate SpriteFrames .tres (default: yes).")
 @click.pass_context

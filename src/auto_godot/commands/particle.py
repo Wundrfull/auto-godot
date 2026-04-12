@@ -8,13 +8,61 @@ from typing import Any
 import rich_click as click
 
 from auto_godot.errors import ProjectError
+from auto_godot.formats.tres import SubResource
 from auto_godot.formats.tscn import (
     SceneNode,
     parse_tscn,
+    resolve_parent_path,
     serialize_tscn,
 )
-from auto_godot.formats.values import Color, Vector2
+from auto_godot.formats.values import Color, SubResourceRef, Vector2
 from auto_godot.output import emit, emit_error
+
+
+class _RawGodotValue:
+    """Raw Godot value that bypasses serialize_value quoting."""
+
+    def __init__(self, raw: str) -> None:
+        self._raw = raw
+
+    def __str__(self) -> str:
+        return self._raw
+
+    def __repr__(self) -> str:
+        return self._raw
+
+
+def _default_particle_texture_subs(
+    node_name: str,
+) -> tuple[list[SubResource], SubResourceRef]:
+    """Create Gradient + GradientTexture2D SubResources for a particle.
+
+    Returns (sub_resources, texture_ref) where texture_ref is a
+    SubResourceRef to assign to the particle node's texture property.
+    """
+    grad_id = f"{node_name}_grad"
+    tex_id = f"{node_name}_tex"
+
+    gradient = SubResource(
+        type="Gradient",
+        id=grad_id,
+        properties={
+            "colors": _RawGodotValue(
+                "PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)"
+            ),
+        },
+    )
+    texture = SubResource(
+        type="GradientTexture2D",
+        id=tex_id,
+        properties={
+            "gradient": SubResourceRef(grad_id),
+            "fill": 1,
+            "fill_from": Vector2(0.5, 0.5),
+            "fill_to": Vector2(0.5, 1.0),
+        },
+    )
+    return [gradient, texture], SubResourceRef(tex_id)
 
 
 @click.group(invoke_without_command=True)
@@ -171,7 +219,7 @@ def add(
         text = path.read_text(encoding="utf-8")
         scene = parse_tscn(text)
 
-        parent = parent_path or "."
+        parent = resolve_parent_path(scene.nodes, parent_path) if parent_path else "."
 
         for node in scene.nodes:
             if node.name == node_name and node.parent == parent:
@@ -206,6 +254,11 @@ def add(
             props["one_shot"] = one_shot
             if one_shot:
                 props["emitting"] = False
+
+        # Add default particle texture (radial white-to-transparent gradient)
+        tex_subs, tex_ref = _default_particle_texture_subs(node_name)
+        scene.sub_resources.extend(tex_subs)
+        props["texture"] = tex_ref
 
         scene.nodes.append(SceneNode(
             name=node_name,

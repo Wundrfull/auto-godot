@@ -2,7 +2,7 @@
 
 Agent-native CLI for the Godot game engine. Wraps Godot's headless mode and directly manipulates Godot's text-based file formats (`.tscn`, `.tres`, `project.godot`) to automate workflows that normally require the editor GUI.
 
-**7,200+ lines of source** | **676 tests** | **28 commands** | **No Godot binary required for file operations**
+**18,000+ lines of source** | **1,400+ tests** | **111 commands** | **No Godot binary required for file operations**
 
 ## Why
 
@@ -14,14 +14,16 @@ auto-godot fills a specific gap in Godot tooling: headless, editor-free file gen
 
 | Need | Existing Solutions | auto-godot |
 |------|-------------------|---------|
-| GDScript quality | Linters and formatters (GDScript-focused) | Not covered (different domain) |
 | CI/CD export | Docker images with headless Godot | `auto-godot export` wraps headless binary with retry logic |
 | Editor automation | MCP servers (require running editor instance) | No editor needed; direct file manipulation |
 | Aseprite to SpriteFrames | None | `auto-godot sprite import-aseprite` |
+| TexturePacker to SpriteFrames | Editor plugin only (CodeAndWeb) | `auto-godot sprite import-texturepacker` |
 | TileSet terrain automation | None (manual editor work) | `auto-godot tileset auto-terrain` |
-| Resource inspection | Editor only | `auto-godot resource inspect --json` |
+| Resource inspection | Editor only | `auto-godot resource inspect --json`, `resource dump` |
+| GDScript documentation | GDQuest docs-maker (Godot 3 only, unmaintained) | `auto-godot script docs` |
+| Export preset management | No standalone tool | `auto-godot preset inspect`, `preset validate` |
 
-No other tool generates SpriteFrames from Aseprite JSON or automates TileSet terrain peering bits without the Godot editor.
+No other tool generates SpriteFrames from Aseprite or TexturePacker JSON, automates TileSet terrain peering bits, or generates GDScript documentation for Godot 4 without the Godot editor.
 
 ## Install
 
@@ -42,13 +44,17 @@ Requires Python 3.12+. Godot 4.5+ binary on PATH is only needed for headless com
 
 ### Sprite Commands
 
-Convert Aseprite sprite sheet exports into valid Godot SpriteFrames `.tres` resources, entirely from the command line, no Godot editor required.
+Convert sprite sheet exports into valid Godot SpriteFrames `.tres` resources, entirely from the command line, no Godot editor required. Supports both Aseprite and TexturePacker workflows.
 
 ```bash
 # Convert Aseprite JSON export to SpriteFrames .tres
 auto-godot sprite import-aseprite character.json
 auto-godot sprite import-aseprite character.json -o sprites/character.tres
 auto-godot sprite import-aseprite character.json --res-path res://art/character.png
+
+# Convert TexturePacker JSON atlas to SpriteFrames .tres
+auto-godot sprite import-texturepacker atlas.json
+auto-godot sprite import-texturepacker atlas.json -o sprites/atlas.tres --fps 12
 
 # Split a sprite sheet into frames
 auto-godot sprite split sheet.png --frame-size 32x32
@@ -62,7 +68,7 @@ auto-godot sprite validate character.tres
 auto-godot sprite validate character.tres --godot  # also load in headless Godot
 ```
 
-Supports all four Aseprite animation directions (forward, reverse, ping-pong, ping-pong reverse), variable-duration frames via GCD-based base FPS with per-frame multipliers, trimmed sprites with spriteSourceSize offsets, loop settings from repeat counts, and partial failure handling that skips invalid tags and continues.
+Aseprite importer supports all four animation directions (forward, reverse, ping-pong, ping-pong reverse), variable-duration frames via GCD-based FPS, trimmed sprites, and partial failure handling. TexturePacker importer auto-groups frames into animations by filename prefix (`idle_0`, `idle_1` -> animation "idle").
 
 ### TileSet Commands
 
@@ -111,6 +117,30 @@ auto-godot scene create definition.json -o level.tscn
 
 Scene list shows node hierarchy, script references, instanced sub-scenes, and cross-scene dependency graphs. Scene create accepts JSON with full property passthrough for any Godot node type.
 
+### Script Commands
+
+Generate, inspect, and document GDScript files.
+
+```bash
+# Generate a GDScript with boilerplate
+auto-godot script create --extends CharacterBody2D --export "speed:float=200.0" player.gd
+
+# Add elements to existing scripts
+auto-godot script add-method --file player.gd --name take_damage --params "amount: int"
+auto-godot script add-signal --file player.gd --name died
+auto-godot script add-export --file player.gd --name health --type int --value 100
+
+# Attach a script to a scene node
+auto-godot script attach --scene main.tscn --node Player --script res://scripts/player.gd
+
+# Generate documentation from GDScript files
+auto-godot script docs scripts/player.gd
+auto-godot script docs /path/to/project -o docs/
+auto-godot --json script docs scripts/player.gd
+```
+
+`script docs` parses `##` doc comments (Godot 4 syntax), signals, exports, functions, enums, and constants. Outputs Markdown or JSON. Accepts a single file or a directory (recursive).
+
 ### Export and Import Commands
 
 Headless Godot project export for CI/CD pipelines.
@@ -124,9 +154,15 @@ auto-godot export pack "Web"
 # Force re-import (with retry logic for known Godot timing bugs)
 auto-godot import
 auto-godot import --max-retries 5
+
+# Manage export presets
+auto-godot preset list
+auto-godot preset create --platform windows --platform web
+auto-godot preset inspect "Windows Desktop"
+auto-godot preset validate  # check for issues before building
 ```
 
-Export auto-runs import first when the import cache is missing. Import uses exponential backoff retry and `--quit-after` instead of `--quit` to avoid Godot race conditions.
+Export auto-runs import first when the import cache is missing. Import uses exponential backoff retry and `--quit-after` instead of `--quit` to avoid Godot race conditions. `preset validate` checks for duplicate names, missing export paths, unrecognized platforms, and missing export directories.
 
 ### Project Commands
 
@@ -142,13 +178,24 @@ auto-godot project validate --godot  # also check script syntax
 auto-godot project create my-game
 ```
 
-### Resource Inspection
+### Resource Commands
 
 ```bash
-# Dump any .tres or .tscn as structured JSON
-auto-godot resource inspect player.tres --json
+# Inspect any .tres or .tscn (tree view or JSON)
+auto-godot resource inspect player.tres
 auto-godot resource inspect level.tscn --json
+
+# Dump full parsed structure as JSON AST
+auto-godot resource dump scene.tscn
+auto-godot resource dump scene.tscn --section nodes
+auto-godot resource dump spriteframes.tres --section properties
+
+# Create gradient and curve resources
+auto-godot resource create-gradient --stop "0:black" --stop "1:white" fade.tres
+auto-godot resource create-curve --point "0,0" --point "0.5,1" --point "1,0" falloff.tres
 ```
+
+`resource dump` always outputs JSON and supports `--section` filtering: `nodes`, `ext_resources`, `sub_resources`, `properties`, `connections`.
 
 ### AI Agent Discoverability
 
@@ -195,7 +242,7 @@ uv run pytest --cov=auto_godot
 uv run pytest tests/e2e/ -v
 ```
 
-668 unit tests covering the parser, value types, Aseprite conversion, SpriteFrames builder, TileSet builder, terrain peering bits, export pipeline, scene builder, SKILL.md generator, golden file comparison, and CLI integration. 8 E2E tests validate generated resources in headless Godot (skipped when Godot is not available).
+1,400+ unit tests covering the parser, value types, Aseprite and TexturePacker conversion, SpriteFrames builder, TileSet builder, terrain peering bits, export pipeline, scene builder, script generation, GDScript docs, resource inspection and dump, preset management, locale management, SKILL.md generator, golden file comparison, and CLI integration. E2E tests validate generated resources in headless Godot (skipped when Godot is not available).
 
 ## License
 

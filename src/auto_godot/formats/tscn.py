@@ -200,14 +200,29 @@ def _extract_connection(section: Section) -> Connection:
     if binds_str:
         parsed = parse_value(binds_str)
         binds = parsed if isinstance(parsed, list) else None
+    # Integer attrs on [connection] tolerate malformed input: a
+    # hand-edited scene with a non-integer flags= or unbinds= should
+    # drop to None rather than crash the whole parse.
+    flags: int | None = None
+    if flags_str:
+        try:
+            flags = int(flags_str)
+        except ValueError:
+            flags = None
+    unbinds: int | None = None
+    if unbinds_str:
+        try:
+            unbinds = int(unbinds_str)
+        except ValueError:
+            unbinds = None
     return Connection(
         signal=attrs.get("signal", ""),
         from_node=attrs.get("from", ""),
         to_node=attrs.get("to", ""),
         method=attrs.get("method", ""),
-        flags=int(flags_str) if flags_str else None,
+        flags=flags,
         binds=binds,
-        unbinds=int(unbinds_str) if unbinds_str else None,
+        unbinds=unbinds,
         raw_section=section,
     )
 

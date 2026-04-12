@@ -173,6 +173,35 @@ class TestParseTscnConnections:
         assert "binds=" not in rebuilt
         assert "unbinds=" not in rebuilt
 
+    def test_binds_unbinds_survive_model_rebuild(self) -> None:
+        # Most CLI commands null raw_header/raw_sections to force
+        # serialize_tscn through _build_tscn_from_model. That path is
+        # the actual data-loss surface -- exercise it explicitly.
+        source = (
+            '[gd_scene format=3]\n\n'
+            '[node name="Main" type="Control"]\n\n'
+            '[connection signal="pressed" from="." to="." '
+            'method="_on_pressed" binds=[1, 2] unbinds=1]\n'
+        )
+        scene = parse_tscn(source)
+        scene._raw_header = None
+        scene._raw_sections = None
+        rebuilt = serialize_tscn(scene)
+        assert "binds=[1, 2]" in rebuilt
+        assert "unbinds=1" in rebuilt
+
+    def test_unbinds_malformed_drops_to_none(self) -> None:
+        # A hand-edited scene with a non-integer unbinds= must not
+        # crash the parse -- fall through to None.
+        text = (
+            '[gd_scene format=3]\n\n'
+            '[node name="Main" type="Control"]\n\n'
+            '[connection signal="pressed" from="." to="." '
+            'method="_on_pressed" unbinds=x]\n'
+        )
+        scene = parse_tscn(text)
+        assert scene.connections[0].unbinds is None
+
 
 # ---------------------------------------------------------------------------
 # Round-trip fidelity

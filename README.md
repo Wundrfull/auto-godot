@@ -176,7 +176,22 @@ auto-godot project validate --godot  # also check script syntax
 
 # Scaffold a new Godot project
 auto-godot project create my-game
+
+# Configure display/window settings
+auto-godot project set-display --width 320 --height 180 --window-width 1280 --window-height 720
+
+# Pixel art preset: one flag applies viewport stretch + keep aspect +
+# nearest texture filter + snap 2D transforms to pixel + integer scale
+auto-godot project set-display --width 320 --height 240 --window-width 960 --window-height 720 --pixel-art
 ```
+
+The `--pixel-art` preset sets:
+`window/stretch/mode=viewport`, `window/stretch/aspect=keep`,
+`textures/canvas_textures/default_texture_filter=nearest`,
+`2d/snap/snap_2d_transforms_to_pixel=true`, and
+`window/stretch/scale_mode=integer`. Explicit flags
+(`--stretch-mode`, `--stretch-aspect`, `--texture-filter`) still
+override the preset when passed alongside `--pixel-art`.
 
 ### Resource Commands
 
